@@ -4,9 +4,10 @@
 download, just press Play.
 
 The PyGamer FUNC MACHINE v2, ported to a single self-contained HTML page
-(no build, no samples, all synthesis live in Web Audio), dressed in a
-Windows ME theme (teal desktop, silver windows, taskbar with a working
-Start button), and expanded where the web allows more room:
+(no build, no samples, all synthesis live in Web Audio), dressed as
+classic Mac OS (monochrome System-era windows, racing-stripe title bars,
+a menu bar at the top whose Apple logo toggles Play), and expanded
+where the web allows more room:
 
 - **Tracks:** 4 → 8, still one generator × one engine each, polymeter 1–32 steps.
 - **Generators:** the original 5 (EUCLID / PROB / AUTOMATA / WALK / FUNC) plus
@@ -63,12 +64,12 @@ Recording downloads WebM (browser-native), not WAV.
 If you like this and want to support more of it:
 
 - **Bitcoin (BTC):** `bc1qvl6sy99kn9rll3jjzu96vfkmezcfjq6yf58qd9`
+- **Ethereum (ETH):** `0x2D4B15760e621af2aC100EC8e39A10D57621E4AC`
 - **Ethereum Classic (ETC):** `0x2D4B15760e621af2aC100EC8e39A10D57621E4AC`
 
 (The same addresses are in the donate footer at the bottom of the page,
-with copy buttons. The ETC address is the same wallet address previously
-listed for Ethereum donations — a 0x address receives on either network;
-send ETC on the Ethereum Classic network.)
+with copy buttons. ETH and ETC share one wallet address — send ETH on
+the Ethereum network and ETC on the Ethereum Classic network.)
 
 ## Honest limits
 One voice per track (a new note cuts the previous one on that track),
