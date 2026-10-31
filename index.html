@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>FUNC MACHINE WEB — Generative Function Sound Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#008080;--silver:#c0c0c0;--navy:#000080;--blue:#1084d0;--ink:#000}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+::selection{background:#000080;color:#fff}
+::-webkit-scrollbar{width:16px;height:16px}
+::-webkit-scrollbar-track{background:repeating-conic-gradient(#c0c0c0 0% 25%,#d8d8d8 0% 50%) 8px 8px}
+::-webkit-scrollbar-thumb{background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080}
+body{margin:0;background:#008080;color:#000;font-family:Tahoma,"Segoe UI",Verdana,Geneva,sans-serif;font-size:13px;line-height:1.45;padding:12px 12px 52px}
+.mono{font-family:"Lucida Console",Monaco,monospace}
+.wrap{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.panel,.track{background:#c0c0c0;border:2px solid;border-color:#dfdfdf #404040 #404040 #dfdfdf;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #808080;border-radius:0;padding:0 12px 14px;min-width:0}
+.panel h2{background:linear-gradient(90deg,#000080,#1084d0);color:#fff;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;margin:0 -12px 12px;padding:4px 6px 4px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.panel h2 .sub{color:#dceeff;font-weight:400;font-size:11px;text-transform:none;letter-spacing:0}
+.panel h2::after{content:"–  ▢  ✕";flex:none;background:#c0c0c0;color:#000;font-size:10px;font-weight:700;padding:1px 5px;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;letter-spacing:2px}
+.dot{width:8px;height:8px;background:#00e000;border:1px solid #004000;display:inline-block;vertical-align:1px}
+.dot.off{background:#808080;border-color:#404040}
+button{font-family:Tahoma,Verdana,sans-serif;font-size:13px;color:#000;background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;border-radius:0;padding:5px 12px;cursor:pointer}
+button:hover{background:#c8c8c8}
+button:active,button.on{border-color:#404040 #fff #fff #404040;box-shadow:inset -1px -1px 0 #dfdfdf,inset 1px 1px 0 #808080;background:repeating-conic-gradient(#c8c8c8 0% 25%,#dcdcdc 0% 50%) 8px 8px}
+button.on{font-weight:700}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+button.small{padding:3px 9px;font-size:12px}
+button.danger.on{background:#a00000;color:#fff}
+select,input[type=text],input[type=number]{font-family:Tahoma,Verdana,sans-serif;font-size:13px;color:#000;background:#fff;border:2px solid;border-color:#808080 #dfdfdf #dfdfdf #808080;box-shadow:inset 1px 1px 2px #a0a0a0;border-radius:0;padding:3px 4px;max-width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:#8a8a8a;border-top:1px solid #fff;border-bottom:1px solid #404040}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:21px;background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;border-radius:0;margin-top:-10px}
+input[type=range]::-moz-range-track{height:4px;background:#8a8a8a;border-top:1px solid #fff}
+input[type=range]::-moz-range-thumb{width:9px;height:19px;background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0}
+input[type=checkbox]{accent-color:#000080;width:14px;height:14px}
+.ctl label{display:flex;justify-content:space-between;font-size:11px;color:#000;margin-bottom:1px}
+.ctl label .v{font-family:Tahoma,sans-serif;font-weight:700;color:#000080;font-size:11.5px}
+.ctlrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px 14px}
+.checks{display:flex;flex-wrap:wrap;gap:2px 10px}
+.checks label{display:flex;gap:5px;align-items:center;padding:3px 4px;font-size:12.5px;cursor:pointer;background:transparent;border:none}
+/* transport window */
+#transport{position:static}
+#transport::before{content:"FUNC MACHINE WEB — Generative Function Sound Machine";display:block;background:linear-gradient(90deg,#000080,#1084d0);color:#fff;font-weight:700;font-size:12px;padding:3px 10px;margin:0 -12px 8px}
+.tport{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#playBtn{font-size:15px;font-weight:700;padding:7px 22px;min-width:132px;background:#c0c0c0;color:#000}
+#playBtn.playing{border-color:#404040 #fff #fff #404040;box-shadow:inset -1px -1px 0 #dfdfdf,inset 1px 1px 0 #808080;background:repeating-conic-gradient(#c8c8c8 0% 25%,#dcdcdc 0% 50%) 8px 8px;color:#a00000}
+.tstat{font-family:Tahoma,sans-serif;font-size:11px;color:#000}
+.tstat b{color:#000080;font-size:14px;font-weight:700}
+canvas#scope{width:100%;height:34px;display:block;background:#000;border:2px solid;border-color:#808080 #fff #fff #808080;border-radius:0}
+/* form timeline */
+#formBar{display:flex;height:26px;overflow:hidden;background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;border-radius:0}
+#formBar .seg{position:relative;background:#c0c0c0;border-right:1px solid #808080;font-size:11px;color:#000;padding:4px 6px;white-space:nowrap;overflow:hidden}
+#formBar .seg.cur{background:#000080;color:#fff;font-weight:700}
+#formProg{height:10px;background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;margin-top:8px}
+#formProgFill{height:100%;background:#000080;width:0%}
+/* tracks = windows */
+#tracks{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:16px}
+@media(max-width:520px){#tracks{grid-template-columns:1fr}}
+.track.muted{opacity:.72}
+.track.locked{outline:2px solid #000080;outline-offset:2px}
+.thead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:linear-gradient(90deg,#000080,#1084d0);margin:0 -12px 10px;padding:4px 8px}
+.thead .tname{font-weight:700;font-size:13px;color:#fff}
+.thead select{font-size:12px;padding:2px 3px}
+.thead button{background:#c0c0c0;color:#000}
+.grid32{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:10px 0 4px}
+.grid32 .cell{height:18px;background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;border-radius:0;cursor:pointer;padding:0}
+.grid32 .cell.gate{background:#000080;border-color:#4040a0 #000040 #000040 #4040a0;box-shadow:none}
+.grid32 .cell.gate.acc{background:#1084d0}
+.grid32 .cell.now{outline:2px solid #ffff00;outline-offset:1px}
+.grid32 .cell.ovrOn{box-shadow:inset 0 0 0 2px #00d7ff}
+.grid32 .cell.ovrOff{box-shadow:inset 0 0 0 2px #ff2020}
+.grid32 .cell.beat{border-top-color:#fff}
+.tgrid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+details{margin-top:10px;border:2px groove #dfdfdf;padding:10px 10px 12px}
+summary{cursor:pointer;color:#000;font-size:12.5px;font-weight:700;padding:0 4px;margin-top:-19px;background:#c0c0c0;width:max-content;max-width:95%}
+details>*:not(summary){margin-top:8px}
+.log{font-family:"Lucida Console",Monaco,monospace;font-size:11.5px;color:#000;background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 2px #a0a0a0;padding:8px;max-height:220px;overflow:auto;white-space:pre-wrap}
+.log b{color:#000080}
+.presetGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.preset{text-align:left;padding:9px 11px}
+.preset .pn{font-weight:700}
+.preset .pd{font-size:11.5px;color:#404040}
+.secRow{display:grid;grid-template-columns:110px repeat(6,1fr) 70px 34px;gap:6px;align-items:center;margin-bottom:6px}
+.secRow input{width:100%;padding:3px 5px;font-size:12.5px}
+.secHead{font-size:10.5px;color:#404040;text-transform:uppercase;letter-spacing:.03em;font-weight:700}
+.guide p{margin:0 0 8px;color:#000;font-size:13px}
+.guide b{color:#000080}
+.kbdRow{display:flex;flex-wrap:wrap;gap:8px}
+a{color:#000080}
+.small-note{font-size:12px;color:#303030}
+.donateRow{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:8px}
+.donateRow .coin{font-weight:700;min-width:118px;padding-top:5px}
+.addr{flex:1 1 340px;background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 2px #a0a0a0;padding:4px 8px;word-break:break-all;font-size:12.5px}
+/* taskbar */
+#taskbar{position:fixed;left:0;right:0;bottom:0;height:36px;background:#c0c0c0;border-top:2px solid;border-color:#dfdfdf;box-shadow:0 -1px 0 #fff;display:flex;align-items:center;gap:8px;padding:3px 6px;z-index:200}
+#startBtn{font-weight:700;font-style:italic;font-size:14px;padding:3px 16px 3px 10px}
+.taskItem{border:2px solid;border-color:#404040 #fff #fff #404040;box-shadow:inset -1px -1px 0 #dfdfdf,inset 1px 1px 0 #808080;background:repeating-conic-gradient(#c8c8c8 0% 25%,#dcdcdc 0% 50%) 8px 8px;padding:3px 12px;font-size:12px;font-weight:700;flex:0 1 300px;white-space:nowrap;overflow:hidden}
+#taskClock{margin-left:auto;border:2px solid;border-color:#808080 #fff #fff #808080;padding:3px 14px;font-size:12px;background:#c0c0c0;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="panel" id="transport">
+  <div class="tport">
+    <button id="playBtn">▶ PLAY</button>
+    <div class="tstat">TEMPO<br><b id="bpmVal">132</b> BPM</div>
+    <div style="min-width:150px;flex:0 1 190px" class="ctl"><label>BPM <span class="v" id="bpmLab">132</span></label><input type="range" id="bpm" min="30" max="260" value="132"></div>
+    <div style="min-width:120px;flex:0 1 150px" class="ctl"><label>Swing <span class="v" id="swingLab">0%</span></label><input type="range" id="swing" min="0" max="60" value="0"></div>
+    <div style="min-width:130px;flex:0 1 170px" class="ctl"><label>Master volume <span class="v" id="masterLab">80</span></label><input type="range" id="master" min="0" max="100" value="80"></div>
+    <div class="tstat">BAR<br><b id="barVal">0</b></div>
+    <div class="tstat">SECTION<br><b id="secVal">—</b></div>
+    <div class="tstat">SEED<br><b id="seedVal" class="mono">ACE5</b></div>
+    <button id="newSeedBtn">🎲 New seed</button>
+    <button id="randBtn">⚄ Randomize system</button>
+  </div>
+  <div style="margin-top:8px"><canvas id="scope" width="1200" height="36"></canvas></div>
+</div>
+
+<div class="panel">
+  <h2><span>Form Director — how the piece travels <span class="dot" id="formDot"></span></span><span class="sub">sections morph — density, energy, evolve and FX ease toward each section's targets, bar by bar</span></h2>
+  <div class="ctlrow">
+    <div class="ctl"><label>Director</label><select id="formOn"><option value="1">ON</option><option value="0">OFF</option></select></div>
+    <div class="ctl"><label>Arc</label><select id="arcSel"></select></div>
+    <div class="ctl"><label>Target length</label><select id="targetSel"><option value="0">Endless</option><option value="5">5 minutes</option><option value="8">8 minutes</option><option value="10" selected>10 minutes</option><option value="15">15 minutes</option><option value="25">25 minutes</option></select></div>
+    <div class="ctl"><label>At the end</label><select id="endSel"><option value="LOOP">Loop arc</option><option value="STOP">Fade &amp; stop</option></select></div>
+    <div class="ctl"><label>Mode</label><select id="modeSel"><option value="SYSTEM">System</option><option value="AMBIENT">Ambient (sparse, long, wandering tonic)</option><option value="DENSE">Dense (busy, short, forward)</option></select></div>
+    <div class="ctl"><label>Ambient harm. walk (bars)</label><select id="harmSel"><option value="0">Off</option><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option></select></div>
+  </div>
+  <div id="formBar" style="margin-top:12px"></div>
+  <div id="formProg"><div id="formProgFill"></div></div>
+  <div class="small-note" id="formNote" style="margin-top:6px"></div>
+  <details><summary>Custom arc editor — build your own sections</summary>
+    <div class="small-note" style="margin:6px 0">Copy the current arc into Custom, then edit names, bar weights, targets and tonic shifts. Recall = an earlier section number whose exact generator state returns (themes come back). Section numbers start at 1.</div>
+    <button class="small" id="copyArcBtn">Copy current arc to Custom &amp; edit</button>
+    <button class="small" id="addSecBtn">+ Add section</button>
+    <div id="secEditor" style="margin-top:10px"></div>
+  </details>
+</div>
+
+<div class="panel">
+  <h2><span>Music — root, scale, custom scale</span><span class="sub">every generator pitches inside the scale; the director and ambient walker move the tonic by scale degrees, never out of the family</span></h2>
+  <div class="ctlrow">
+    <div class="ctl"><label>Root note</label><select id="rootSel"></select></div>
+    <div class="ctl"><label>Scale</label><select id="scaleSel"></select></div>
+    <div class="ctl"><label>Harmonic drift (evolve can move root)</label><select id="harmDrift"><option value="0">Off</option><option value="1">On — by scale degrees</option></select></div>
+  </div>
+  <div style="margin-top:10px"><div class="small-note" style="margin-bottom:6px">CUSTOM SCALE — tap the notes that are in (root C shown; it transposes to your root):</div><div class="checks" id="customScaleBox"></div></div>
+</div>
+
+<div id="tracks"></div>
+
+<div class="panel">
+  <h2><span>Evolution Lab — deciding how it changes</span><span class="sub">this replaces the PyGamer's single EVOLVE knob with full control over what may change, how much, how often, and where</span></h2>
+  <div class="ctlrow">
+    <div class="ctl"><label>Evolve rate <span class="v" id="evoRateLab">25%</span></label><input type="range" id="evoRate" min="0" max="100" value="25"></div>
+    <div class="ctl"><label>Wildness (mutation size) <span class="v" id="evoWildLab">40%</span></label><input type="range" id="evoWild" min="0" max="100" value="40"></div>
+    <div class="ctl"><label>Check every</label><select id="evoEvery"><option value="1">Every cycle</option><option value="2">Every 2 cycles</option><option value="4" selected>Every 4 cycles</option><option value="8">Every 8 cycles</option></select></div>
+    <div class="ctl"><label>Evolution mode</label><select id="evoMode"><option value="drift">Drift — small nudges only</option><option value="jump">Jump — can swap generator / engine / variant</option><option value="bloom">Bloom — biases denser &amp; brighter</option><option value="decay">Decay — biases sparser &amp; darker</option><option value="orbit">Orbit — nudges, then returns toward the start</option></select></div>
+  </div>
+  <div style="margin-top:10px"><div class="small-note" style="margin-bottom:6px">WHAT MAY EVOLVE — untick anything you want held exactly as you set it. Per-track 🔒 Lock and each track's own Evolve % are on the track cards.</div>
+  <div class="checks" id="evoTargets"></div></div>
+  <div class="kbdRow" style="margin-top:12px">
+    <button id="evoNowBtn">⚡ Evolve once, now</button>
+    <button id="undoEvoBtn">↩ Undo last evolution</button>
+    <button id="snapABtn">📸 Save Snapshot A</button>
+    <button id="snapAGetBtn">Recall A</button>
+    <button id="snapBBtn">📸 Save Snapshot B</button>
+    <button id="snapBGetBtn">Recall B</button>
+    <button id="freezeBtn">🧊 Freeze all evolution</button>
+  </div>
+  <div style="margin-top:12px"><div class="small-note" style="margin-bottom:4px">EVOLUTION LOG — every change the machine makes, in plain words:</div><div class="log" id="evoLog">Nothing has evolved yet.</div></div>
+</div>
+
+<div class="panel">
+  <h2><span>Master FX</span><span class="sub">each track has its own Delay send and Reverb send on its card</span></h2>
+  <div class="ctlrow">
+    <div class="ctl"><label>Delay</label><select id="dlyOn"><option value="1">On</option><option value="0">Off</option></select></div>
+    <div class="ctl"><label>Delay time</label><select id="dlyFrac"><option value="0">1/16</option><option value="1">1/8</option><option value="2">3/16</option><option value="3" selected>1/4</option><option value="4">3/8</option><option value="5">1/2</option></select></div>
+    <div class="ctl"><label>Delay feedback <span class="v" id="dlyFbLab">35%</span></label><input type="range" id="dlyFb" min="0" max="92" value="35"></div>
+    <div class="ctl"><label>Delay mix <span class="v" id="dlyMixLab">40</span></label><input type="range" id="dlyMix" min="0" max="100" value="40"></div>
+    <div class="ctl"><label>Ping-pong delay</label><select id="dlyPP"><option value="0">Off</option><option value="1">On</option></select></div>
+    <div class="ctl"><label>Reverb</label><select id="revOn"><option value="1">On</option><option value="0">Off</option></select></div>
+    <div class="ctl"><label>Reverb size <span class="v" id="revSizeLab">55</span></label><input type="range" id="revSize" min="0" max="100" value="55"></div>
+    <div class="ctl"><label>Reverb mix <span class="v" id="revMixLab">35</span></label><input type="range" id="revMix" min="0" max="100" value="35"></div>
+    <div class="ctl"><label>Chorus mix <span class="v" id="choMixLab">0</span></label><input type="range" id="choMix" min="0" max="100" value="0"></div>
+    <div class="ctl"><label>Chorus rate <span class="v" id="choRateLab">30</span></label><input type="range" id="choRate" min="1" max="100" value="30"></div>
+    <div class="ctl"><label>Master drive <span class="v" id="drvLab">0</span></label><input type="range" id="drvAmt" min="0" max="100" value="0"></div>
+    <div class="ctl"><label>Master filter cutoff <span class="v" id="mfLab">100</span></label><input type="range" id="mfCut" min="5" max="100" value="100"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2><span>Presets — complete systems, load &amp; play</span><span class="sub">the 8 PyGamer factory systems, expanded to 8 tracks, plus 4 web-only systems</span></h2>
+  <div class="presetGrid" id="presetGrid"></div>
+</div>
+
+<div class="panel">
+  <h2><span>Save, share, record, MIDI</span></h2>
+  <div class="kbdRow">
+    <button id="saveBtn">💾 Save system (.json)</button>
+    <button id="loadBtn">📂 Load system</button><input type="file" id="loadFile" accept=".json,application/json" style="display:none">
+    <button id="shareBtn">🔗 Copy share link (seed + system in URL)</button>
+    <button id="recBtn">⏺ Record audio</button>
+    <button id="midiExpBtn">🎹 Export played notes as MIDI</button>
+    <button id="midiBtn">MIDI out: check</button>
+    <select id="midiSel" style="min-width:180px"><option value="">No MIDI output</option></select>
+  </div>
+  <div class="small-note" id="ioNote" style="margin-top:8px">Recording captures the master bus in your browser (WebM). MIDI export writes every note played since you pressed Play. Share links carry the whole system — same link, same music. MIDI OUT sends notes on channels 1–8 (tracks 1–8) plus 24 PPQ clock and start/stop: on a Mac, enable the IAC Driver (Audio MIDI Setup), pick it here, and in Ableton set that input's Track (and Sync, if you want Ableton to follow this tempo) on.</div>
+</div>
+
+<div class="panel guide">
+  <h2><span>Guide</span></h2>
+  <p><b>Start:</b> press the big PLAY button at the top. It is already making music — a seed completely determines the system, so <b>New seed</b> is a new piece with the same settings.</p>
+  <p><b>Tracks:</b> each track is a generator (where notes come from) × an engine (what they sound like), running at its own step length — that's the polymeter. Click steps in a track's grid to force a step ON (blue ring), force it OFF (red ring), or back to AUTO (third click).</p>
+  <p><b>Sound:</b> open <b>Sound design</b> on any track for a full ADSR, filter, drive, glide and two engine knobs — their names change with the engine (FM gets Ratio / Mod amount, Pluck gets Damping / Brightness, and so on). Audition plays the track once, right now.</p>
+  <p><b>Change:</b> the <b>Evolution Lab</b> decides what the machine may rewrite — rhythm, pitch, density, length, engine, sound knobs, harmony, FX — how wild, how often, and in which direction. Conditional mutation is per-track: when a track fires, it can reach over and mutate the next track or a random one. Everything it does is written in the Evolution Log, and <b>Undo</b> takes the last change back.</p>
+  <p><b>Form:</b> the Form Director divides your target length into sections and morphs between them. Build your own arc in the Custom arc editor — including sections that recall an earlier section's exact state, so themes return.</p>
+  <p><b>Honest limits:</b> one voice per track, like the PyGamer (new notes cut the old one on that track). CHORD plays a real triad in the browser; over MIDI it sends the root note, like the PyGamer. Pluck/String are true Karplus-Strong, computed per note. Web MIDI needs Chrome/Edge and your permission.</p>
+</div>
+
+
+<div class="panel" id="donatePanel">
+  <h2><span>Support — donate BTC / ETC</span><span class="sub">the machine is free to play; donations keep it evolving</span></h2>
+  <p style="margin:0 0 4px">If FUNC MACHINE WEB made you something strange and beautiful, you can chip in here:</p>
+  <div class="donateRow"><span class="coin">₿ Bitcoin (BTC)</span><span class="addr mono">bc1qvl6sy99kn9rll3jjzu96vfkmezcfjq6yf58qd9</span><button class="small" data-copy= + BTC + >Copy</button></div>
+  <div class="donateRow"><span class="coin">⟠ Ethereum Classic (ETC)</span><span class="addr mono">0x2D4B15760e621af2aC100EC8e39A10D57621E4AC</span><button class="small" data-copy= + ETC + >Copy</button></div>
+  <div class="small-note" style="margin-top:8px">Send only BTC to the Bitcoin address and only ETC (on the Ethereum Classic network) to the ETC address. Double-check the address after pasting — crypto transfers can't be undone.</div>
+</div>
+</div>
+<div id="taskbar"><button id="startBtn">🪟 Start</button><div class="taskItem">FUNC MACHINE WEB</div><div id="taskClock">--:--</div></div>
+<script>
+"use strict";
+/* ================= CORE — ported from func_core.h (PyGamer v2) ================= */
+const GEN=["EUCLID","PROB","AUTOMATA","WALK","FUNC","TURING","MARKOV","LOGISTIC"];
+const ENG=["FM","SUBTRACT","NOISE","PLUCK","PAD","BELL","BASS","CHORD","STRING","DRUM","WAVETABLE"];
+const ENG_VAR=[["GLASS","METAL","HOLLOW"],["SAW","SQUARE","DEEP"],["HISS","CRACKLE","RUMBLE"],["NYLON","STEEL","HARP"],["MIST","CHOIR","DRONE"],["GLASS","BRONZE","ICE"],["SUB","ACID","HOLLOW"],["STAB","SUS","FIFTH"],["WIRE","VELVET","BOWED"],["PUNCH","DUST","METAL"],["MORPH","PULSE","FOLD"]];
+const NOTE_NAME=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const SCALES={MINOR:[0,2,3,5,7,8,10],MAJOR:[0,2,4,5,7,9,11],DORIAN:[0,2,3,5,7,9,10],PHRYGIAN:[0,1,3,5,7,8,10],LYDIAN:[0,2,4,6,7,9,11],MIXOLYDIAN:[0,2,4,5,7,9,10],HARM_MINOR:[0,2,3,5,7,8,11],PENTA_MAJ:[0,2,4,7,9],PENTA_MIN:[0,3,5,7,10],BLUES:[0,3,5,6,7,10],WHOLE_TONE:[0,2,4,6,8,10],CHROMATIC:[0,1,2,3,4,5,6,7,8,9,10,11],CUSTOM:[0,2,3,5,7,8,10]};
+const SCALE_NAMES={MINOR:"Minor",MAJOR:"Major",DORIAN:"Dorian",PHRYGIAN:"Phrygian",LYDIAN:"Lydian",MIXOLYDIAN:"Mixolydian",HARM_MINOR:"Harmonic minor",PENTA_MAJ:"Pentatonic major",PENTA_MIN:"Pentatonic minor",BLUES:"Blues",WHOLE_TONE:"Whole tone",CHROMATIC:"Chromatic",CUSTOM:"Custom (below)"};
+const PARAM_DEF={EUCLID:{min:1,max:7,def:2,label:"Pitch interval (scale degrees per hit)"},PROB:{min:1,max:14,def:5,label:"Spread (scale degrees the pitch roams)"},AUTOMATA:{min:0,max:255,def:30,label:"Rule 0–255 (30 & 90 are famous)"},WALK:{min:1,max:6,def:2,label:"Max walk step (scale degrees)"},FUNC:{min:0,max:2,def:0,label:"Shape: 0=SIN · 1=XOR · 2=MOD"},TURING:{min:0,max:100,def:12,label:"Flip chance % when the loop recycles"},MARKOV:{min:1,max:7,def:3,label:"Volatility (how far the melody leaps)"},LOGISTIC:{min:0,max:100,def:62,label:"Chaos amount (logistic map r)"}};
+const KNOB_LABELS={FM:["Mod ratio","Mod amount"],SUBTRACT:["Filter env amount","Sub / square blend"],NOISE:["Band frequency","Band width (Q)"],PLUCK:["Damping","Brightness"],PAD:["Detune (cents)","Filter drift"],BELL:["Inharmonicity","Strike brightness"],BASS:["Filter env amount","Square blend"],CHORD:["Filter openness","Strum (ms)"],STRING:["Damping","Bow pressure"],DRUM:["Body pitch drop","Snap / noise amount"],WAVETABLE:["Wave fold","Detune / chorus width"]};
+const DFRAC_STEPS=[1,2,3,4,6,8];
+const HARM_PROG=[0,4,5,3];
+let rngState=1;
+function srand(seed){rngState=(seed|0)||1}
+function rand(){let x=rngState|0;x^=x<<13;x^=x>>>17;x^=x<<5;rngState=x|0;return (x>>>0)/4294967296}
+function randBelow(n){return n?Math.floor(rand()*n):0}
+function rand100(){return Math.floor(rand()*100)}
+function clamp(v,a,b){return v<a?a:(v>b?b:v)}
+function scaleDegs(){return SCALES[S.scale]&&SCALES[S.scale].length?SCALES[S.scale]:[0]}
+function rootSemi(){const deg=scaleDegs(),slen=deg.length;let off=S.secRootDeg+(S.mode==="AMBIENT"?HARM_PROG[S.harmPos&3]:0);let oct=Math.floor(off/slen);let idx=off-oct*slen;return S.root+deg[idx]+12*oct}
+function degreeToNote(t,deg){const d=scaleDegs(),slen=d.length,range=slen*2;deg=((deg%range)+range)%range;let n=36+rootSemi()+t.octave*12+d[deg%slen]+12*Math.floor(deg/slen)+(t.tune||0);return clamp(Math.round(n),1,126)}
+function noteFreq(n){return 440*Math.pow(2,(n-69)/12)}
+function effDensity(t){let d=t.density;if(S.form.on)d=Math.round(d*S.cur.dens/100);if(S.mode==="AMBIENT")d=Math.round(d*0.55);if(S.mode==="DENSE")d=Math.round(d*1.25);return clamp(d,0,100)}
+
+/* ================= STATE ================= */
+function defaultTrack(i){
+  const base={gen:"EUCLID",engine:"FM",variant:0,len:16,density:55,param:2,octave:0,tune:0,gate:100,pan:0,level:100,mute:false,lock:false,
+  attack:10,decay:45,sustain:40,release:30,cut:75,res:15,drive:0,glide:0,knobA:50,knobB:50,
+  ratchet:15,cond:20,condTarget:"next",micro:0,evolveAmt:100,dlySend:25,revSend:30,
+  pos:0,gateMap:[],degMap:[],velMap:[],ca:1,walkDeg:0,funcPhase:0,turing:[],markovDeg:4,logiX:0.37,hitCtr:0,lastFreq:0,ovr:new Array(32).fill(0)};
+  const presets=[
+    {gen:"EUCLID",engine:"FM",variant:0,len:16,density:55,param:2,octave:0,pan:-35},
+    {gen:"AUTOMATA",engine:"NOISE",variant:0,len:12,density:45,param:30,octave:1,pan:-12},
+    {gen:"WALK",engine:"PLUCK",variant:0,len:14,density:50,param:2,octave:0,pan:12},
+    {gen:"FUNC",engine:"SUBTRACT",variant:0,len:24,density:60,param:0,octave:-1,pan:35},
+    {gen:"PROB",engine:"PAD",variant:0,len:16,density:26,param:6,octave:0,pan:-20,gate:300,attack:55,revSend:60,dlySend:35},
+    {gen:"EUCLID",engine:"BELL",variant:0,len:20,density:32,param:3,octave:1,pan:22,revSend:55},
+    {gen:"AUTOMATA",engine:"BASS",variant:1,len:16,density:42,param:90,octave:-1,pan:-6},
+    {gen:"WALK",engine:"CHORD",variant:0,len:8,density:44,param:2,octave:0,pan:8,gate:160,revSend:45}];
+  return Object.assign(base,presets[i%presets.length]);
+}
+let S=null;
+function freshState(){return {bpm:132,swing:0,master:80,root:0,scale:"MINOR",seed:0xACE5,mode:"SYSTEM",harmEvery:8,harmPos:0,harmDrift:false,
+  dly:{on:true,frac:3,fb:35,mix:40,pp:false},rev:{on:true,size:55,mix:35},cho:{mix:0,rate:30},drv:0,mfCut:100,
+  form:{on:true,target:10,arc:"BUILD",end:"LOOP"},customSecs:null,
+  evo:{rate:25,wild:40,every:4,mode:"drift",targets:{rhythm:true,pitch:true,density:true,length:false,engine:false,sound:true,harmony:false,fx:false}},
+  secRootDeg:0,cur:{dens:100,evolve:100,fx:100,energy:100},tgt:{dens:100,evolve:100,fx:100,energy:100},dirActive:8,
+  secIdx:0,secBar:0,totBar:0,totBars:96,secBars:[],playing:false,stepCtr:0,ending:false,snaps:{},snapOk:{},
+  tracks:Array.from({length:8},(_,i)=>defaultTrack(i))}}
+S=freshState();
+
+/* ================= GENERATORS (faithful port + 3 new) ================= */
+function genSeed(t){const range=scaleDegs().length*2;
+  if(t.gen==="AUTOMATA"){let st=0;const d=effDensity(t);for(let s=0;s<t.len;s++)if(rand100()<d)st|=(1<<s);if(!st)st=1<<randBelow(t.len);t.ca=st>>>0}
+  if(t.gen==="TURING"){t.turing=[];const d=effDensity(t);for(let s=0;s<t.len;s++)t.turing.push(rand100()<d?1:0);if(!t.turing.some(x=>x))t.turing[randBelow(t.len)]=1}
+  t.walkDeg=randBelow(range);t.markovDeg=randBelow(range);t.funcPhase=rand()*6.28318;t.logiX=0.2+rand()*0.6}
+function caNext(state,rule,len){let out=0;for(let s=0;s<len;s++){const l=(state>>>( (s+len-1)%len))&1,c=(state>>>s)&1,r=(state>>>((s+1)%len))&1;if((rule>>>(l*4+c*2+r))&1)out|=(1<<s)}return out>>>0}
+function rollCycle(t,ti){const len=t.len,range=scaleDegs().length*2,dens=effDensity(t);t.gateMap=new Array(len).fill(0);t.degMap=new Array(len).fill(0);t.velMap=new Array(len).fill(90);let h=0;
+  if(t.gen==="EUCLID"){const pulses=Math.floor(dens*len/100);for(let s=0;s<len;s++){if(pulses>0&&((s*pulses)%len)<pulses){t.gateMap[s]=1;t.degMap[s]=(h*t.param)%range;t.velMap[s]=h===0?122:92;h++}}}
+  else if(t.gen==="PROB"){const spread=Math.max(1,t.param);for(let s=0;s<len;s++){if(rand100()<dens){t.gateMap[s]=1;t.degMap[s]=randBelow(Math.min(spread,range));t.velMap[s]=70+randBelow(50)}}}
+  else if(t.gen==="AUTOMATA"){for(let s=0;s<len;s++){if((t.ca>>>s)&1){t.gateMap[s]=1;t.degMap[s]=(h*2+ti*5)%range;t.velMap[s]=88+((h%4)===0?32:0);h++}}}
+  else if(t.gen==="WALK"){for(let s=0;s<len;s++){if(rand100()<dens){t.gateMap[s]=1;t.velMap[s]=96}}}
+  else if(t.gen==="FUNC"){for(let s=0;s<len;s++){let v;const sh=t.param%3;if(sh===0)v=0.5+0.5*Math.sin(6.28318*(2*s/len)+t.funcPhase);else if(sh===1)v=((s^(s*3))&31)/31;else v=((s*5+Math.floor(t.funcPhase*4))%12)/11;if(v*100>=100-dens){t.gateMap[s]=1;t.degMap[s]=Math.floor(v*(range-1));t.velMap[s]=60+Math.floor(v*64)}}}
+  else if(t.gen==="TURING"){if(!t.turing||t.turing.length!==len){const old=t.turing||[];t.turing=Array.from({length:len},(_,i)=>old[i%Math.max(1,old.length)]||0)}for(let s=0;s<len;s++){if(t.turing[s]){t.gateMap[s]=1;t.degMap[s]=(s*3+ti*2)%range;t.velMap[s]=s%4===0?118:90}}}
+  else if(t.gen==="MARKOV"){let deg=t.markovDeg;const steps=[-2,-1,-1,0,1,1,2];for(let s=0;s<len;s++){const leap=steps[randBelow(steps.length)]*Math.ceil(t.param/2);deg+=leap;if(deg<0)deg=-deg;if(deg>=range)deg=2*range-2-deg;deg=clamp(deg,0,range-1);if(s===0||rand100()<dens){t.gateMap[s]=1;t.degMap[s]=deg;t.velMap[s]=84+randBelow(36)}}t.markovDeg=deg}
+  else if(t.gen==="LOGISTIC"){let x=t.logiX;const r=3.2+(t.param/100)*0.79;for(let s=0;s<len;s++){x=r*x*(1-x);if(x*100>=100-dens){t.gateMap[s]=1;t.degMap[s]=Math.floor(x*(range-1));t.velMap[s]=60+Math.floor(x*64)}}}
+}
+function reseed(seed){S.seed=seed>>>0;srand(S.seed);S.tracks.forEach((t,i)=>{t.hitCtr=0;genSeed(t);rollCycle(t,i)});const el=document.getElementById("seedVal");if(el)el.textContent=S.seed.toString(16).toUpperCase().padStart(4,"0")}
+
+/* ================= FORM DIRECTOR (arcs ported from v2) ================= */
+const KEEP="KEEP";
+const ARCS={
+BUILD:[["INTRO",1,15,50,40,70,0,-1],["SPARK",1,30,65,50,60,0,-1],["GROOVE",2,50,80,50,50,0,-1],["DRIVE",2,70,90,60,40,0,-1],["LIFT",1,85,100,70,40,2,-1],["PEAK",2,100,115,80,30,0,-1],["PLATEAU",1,90,100,60,40,0,-1],["OUTRO",1,40,60,40,80,0,-1]],
+DRIFT:[["MIST",2,35,55,90,110,0,-1],["BLOOM",2,55,75,85,100,2,-1],["HOLLOW",2,25,45,95,120,-1,-1],["BLOOM AGAIN",2,60,80,85,95,2,-1],["DEEP",2,30,50,100,130,0,-1],["RETURN",2,45,65,80,110,0,-1]],
+CYCLE:[["THEME",2,60,85,45,55,0,-1],["TURN",2,75,95,55,45,2,-1],["DEPART",2,85,100,65,50,0,-1],["THEME RETURNS",2,65,85,45,60,0,0],["TURN AGAIN",2,80,95,55,45,2,1],["DEPART AGAIN",2,95,105,70,55,0,2]],
+COLLAPSE:[["IGNITE",1,40,70,50,50,0,-1],["CLIMB",2,70,90,60,40,0,-1],["SUMMIT",2,100,115,75,30,0,-1],["FRACTURE",1,55,70,90,120,-1,-1],["VOID",1,5,15,20,140,0,-1],["EMBERS",1,35,55,60,110,0,-1],["SUMMIT RETURNS",2,100,110,70,40,0,2]],
+TIDE:[["SHORE",1,30,60,50,80,0,-1],["SWELL",2,60,85,55,60,1,-1],["CREST",2,90,105,65,45,0,-1],["WITHDRAW",1,45,70,60,90,0,-1],["SWELL II",2,70,90,60,55,2,-1],["CREST II",1,100,115,75,40,0,-1],["UNDERTONE",1,35,55,70,120,0,-1],["THEME RETURNS",2,50,75,60,110,0,0]],
+SURGE:[["PULSE",1,50,70,50,50,0,-1],["PUSH",2,75,95,60,40,0,-1],["OVERDRIVE",2,100,120,85,30,2,-1],["CUT",1,20,30,40,130,0,-1],["PUSH AGAIN",2,85,100,65,45,0,0],["APEX",2,100,120,90,35,0,-1]],
+ORBIT:[["HOME",2,60,85,45,55,0,-1],["AWAY",2,70,90,60,70,3,-1],["FAR SIDE",2,45,65,80,110,-2,-1],["HOME RETURNS",2,65,85,45,60,0,0],["AWAY AGAIN",2,75,95,60,65,3,1],["SETTLE",2,40,60,40,90,0,0]]};
+function arcSecs(){if(S.form.arc==="CUSTOM"&&S.customSecs&&S.customSecs.length)return S.customSecs;return ARCS[S.form.arc]||ARCS.BUILD}
+function secDef(){const a=arcSecs();return a[clamp(S.secIdx,0,a.length-1)]}
+function formRebuild(){const a=arcSecs();let total=S.form.target?Math.round(S.form.target*S.bpm/4):96;if(total<24)total=24;const wsum=a.reduce((x,s)=>x+s[1],0)||1;S.secBars=a.map(s=>Math.max(2,Math.round(total*s[1]/wsum)));S.totBars=S.secBars.reduce((x,y)=>x+y,0);S.secIdx=0;S.secBar=0;S.totBar=0;S.ending=false;const s0=a[0];S.secRootDeg=s0[6];S.cur={dens:s0[3],evolve:s0[4],fx:s0[5],energy:s0[2]};S.tgt={...S.cur};S.dirActive=8;S.snaps={};S.snapOk={};renderFormBar()}
+function snapTake(idx){S.snaps[idx]=S.tracks.map(t=>({ca:t.ca,walk:t.walkDeg,phase:t.funcPhase,gate:[...t.gateMap],deg:[...t.degMap],vel:[...t.velMap],density:t.density,param:t.param,len:t.len,turing:t.turing?[...t.turing]:[],markovDeg:t.markovDeg,logiX:t.logiX}));S.snapOk[idx]=true}
+function snapRestore(idx){const sn=S.snaps[idx];if(!sn)return;S.tracks.forEach((t,i)=>{const d=sn[i];if(!d)return;t.ca=d.ca;t.walkDeg=d.walk;t.funcPhase=d.phase;t.gateMap=[...d.gate];t.degMap=[...d.deg];t.velMap=[...d.vel];t.density=d.density;t.param=d.param;t.len=d.len;if(d.turing&&d.turing.length)t.turing=[...d.turing];t.markovDeg=d.markovDeg;t.logiX=d.logiX})}
+function formApplySection(){const sd=secDef();if(sd[7]>=0)snapRestore(sd[7]);S.secRootDeg=sd[6];S.tgt={dens:sd[3],evolve:sd[4],fx:sd[5],energy:sd[2]};snapTake(S.secIdx);updateFormUI()}
+function onBar(){S.totBar++;if(S.mode==="AMBIENT"&&S.harmEvery&&(S.totBar%S.harmEvery)===0)S.harmPos=(S.harmPos+1)&3;
+  if(!S.form.on||S.ending){updateFormUI();return}
+  for(const k of["dens","evolve","fx","energy"])S.cur[k]+=(S.tgt[k]-S.cur[k])*0.3;
+  S.dirActive=clamp(1+Math.round(S.cur.energy/100*7),1,8);S.secBar++;
+  if(S.secBar>=S.secBars[S.secIdx]){const a=arcSecs();if(S.secIdx+1<a.length){S.secIdx++;S.secBar=0;formApplySection()}else if(S.form.end==="LOOP"){S.secIdx=0;S.secBar=0;S.totBar=0;S.snaps={};S.snapOk={};formApplySection()}else{S.ending=true;logEvo("FORM","Final section finished — fading out")}}
+  updateFormUI()}
+
+/* ================= EVOLUTION ================= */
+let evoLogLines=[],undoStack=[],snapA=null,snapB=null,orbitOrigin=null,frozen=false;
+function logEvo(who,msg){const line="Bar "+S.totBar+" · "+who+" · "+msg;evoLogLines.unshift(line);if(evoLogLines.length>200)evoLogLines.pop();const el=document.getElementById("evoLog");if(el)el.innerHTML=evoLogLines.slice(0,40).map(l=>l.replace(/^(Bar \d+ · [^·]+) · /,"<b>$1</b> · ")).join("\n")}
+function pushUndo(){try{undoStack.push(JSON.stringify({tracks:S.tracks.map(t=>serializeTrack(t)),root:S.root,scale:S.scale}));if(undoStack.length>40)undoStack.shift()}catch(e){}}
+function serializeTrack(t){const o={};for(const k of["gen","engine","variant","len","density","param","octave","tune","gate","pan","level","mute","lock","attack","decay","sustain","release","cut","res","drive","glide","knobA","knobB","ratchet","cond","condTarget","micro","evolveAmt","dlySend","revSend","ca","walkDeg","funcPhase","turing","markovDeg","logiX","ovr"])o[k]=Array.isArray(t[k])?[...t[k]]:t[k];return o}
+function applySerializedTrack(t,o){Object.assign(t,o);if(o.turing)t.turing=[...o.turing];if(o.ovr)t.ovr=[...o.ovr]}
+function nudgeAmt(base){const w=S.evo.wild;return Math.max(1,Math.round(base*(0.4+w/40)*(S.evo.mode==="jump"?1.6:1)))}
+function mutateTrack(ti,source){const t=S.tracks[ti];if(t.lock||frozen)return false;const tg=S.evo.targets;const cats=[];if(tg.rhythm)cats.push("rhythm");if(tg.pitch)cats.push("pitch");if(tg.density)cats.push("density");if(tg.sound)cats.push("sound");if(tg.fx)cats.push("fx");if(tg.length)cats.push("length");if(tg.engine&&(S.evo.mode==="jump"||rand()<0.3))cats.push("engine");if(!cats.length)return false;const cat=cats[randBelow(cats.length)];const T="T"+(ti+1)+" "+t.engine;pushUndo();
+  if(cat==="rhythm"){if(t.gen==="AUTOMATA"){const s=randBelow(t.len);t.ca=(t.ca^(1<<s))>>>0;if(!t.ca)t.ca=1<<s;t.gateMap[s]^=1;logEvo(source+" → "+T,"AUTOMATA bit "+s+" flipped (rule "+t.param+")")}else if(t.gen==="TURING"){const s=randBelow(t.len);t.turing[s]^=1;t.gateMap[s]=t.turing[s];logEvo(source+" → "+T,"TURING step "+(s+1)+(t.turing[s]?" switched ON":" switched OFF"))}else if(t.gen==="EUCLID"){t.gateMap.push(t.gateMap.shift());t.degMap.push(t.degMap.shift());logEvo(source+" → "+T,"EUCLID pattern rotated one step")}else{const s=randBelow(t.len);t.gateMap[s]^=1;logEvo(source+" → "+T,"step "+(s+1)+(t.gateMap[s]?" gate added":" gate removed"))}}
+  else if(cat==="pitch"){const mode=S.evo.mode;if(mode==="jump"&&rand()<0.4){const old=t.param;const pd=PARAM_DEF[t.gen];t.param=clamp(pd.min+randBelow(pd.max-pd.min+1),pd.min,pd.max);logEvo(source+" → "+T,t.gen+" param "+old+" → "+t.param)}else{const d=(rand()<0.5?-1:1)*(1+randBelow(Math.max(1,Math.round(S.evo.wild/25))));t.degMap=t.degMap.map(x=>clamp(x+d,0,scaleDegs().length*2-1));if(rand()<0.3){const old=t.tune;t.tune=clamp(t.tune+(rand()<0.5?-1:1),-12,12);logEvo(source+" → "+T,"tune "+old+" → "+t.tune+" semitones")}else logEvo(source+" → "+T,"melody shifted "+(d>0?"+":"")+d+" scale degrees")}}
+  else if(cat==="density"){let d=nudgeAmt(8)*(rand()<0.5?-1:1);if(S.evo.mode==="bloom")d=Math.abs(d);if(S.evo.mode==="decay")d=-Math.abs(d);const old=t.density;t.density=clamp(t.density+d,3,100);logEvo(source+" → "+T,"density "+old+"% → "+t.density+"%");rollCycle(t,ti)}
+  else if(cat==="length"){const old=t.len;const d=S.evo.mode==="jump"?(randBelow(9)-4):(rand()<0.5?-1:1);t.len=clamp(t.len+(d||1),4,32);t.ovr.length=32;logEvo(source+" → "+T,"length "+old+" → "+t.len+" steps (polymeter shifted)");genSeedSoft(t);rollCycle(t,ti)}
+  else if(cat==="engine"){if(rand()<0.5){const old=ENG_VAR[ENG.indexOf(t.engine)][t.variant];t.variant=randBelow(3);logEvo(source+" → "+T,"variant "+old+" → "+ENG_VAR[ENG.indexOf(t.engine)][t.variant])}else{const old=t.engine;t.engine=ENG[randBelow(ENG.length)];t.variant=randBelow(3);logEvo(source+" → "+T,"ENGINE "+old+" → "+t.engine+" ("+ENG_VAR[ENG.indexOf(t.engine)][t.variant]+")")}}
+  else if(cat==="sound"){const knobs=[["attack","Attack"],["decay","Decay"],["sustain","Sustain"],["release","Release"],["cut","Filter cutoff"],["res","Resonance"],["drive","Drive"],["knobA",KNOB_LABELS[t.engine][0]],["knobB",KNOB_LABELS[t.engine][1]],["gate","Gate %"],["pan","Pan"]];const [k,lab]=knobs[randBelow(knobs.length)];let d=nudgeAmt(14)*(rand()<0.5?-1:1);if(S.evo.mode==="bloom"&&k==="cut")d=Math.abs(d);if(S.evo.mode==="decay"&&k==="cut")d=-Math.abs(d);const old=t[k];const max=k==="gate"?400:(k==="pan"?50:100);const min=k==="gate"?10:(k==="pan"?-50:0);t[k]=clamp(t[k]+d,min,max);logEvo(source+" → "+T,lab+" "+old+" → "+t[k])}
+  else if(cat==="fx"){const k=rand()<0.5?"dlySend":"revSend";const old=t[k];t[k]=clamp(t[k]+nudgeAmt(12)*(rand()<0.5?-1:1),0,100);logEvo(source+" → "+T,(k==="dlySend"?"Delay send ":"Reverb send ")+old+" → "+t[k])}
+  if(S.evo.mode==="orbit"&&orbitOrigin&&rand()<0.22){const o=orbitOrigin[ti];if(o){t.density=Math.round((t.density+o.density)/2);t.cut=Math.round((t.cut+o.cut)/2)}}
+  refreshTrackCard(ti);return true}
+function genSeedSoft(t){if(t.gen==="AUTOMATA"&&!t.ca)t.ca=1;if(t.gen==="TURING"&&(!t.turing||!t.turing.length))t.turing=new Array(t.len).fill(0)}
+function evolveCheck(ti){const t=S.tracks[ti];t.cyc=(t.cyc||0)+1;if(frozen||t.lock)return;if((t.cyc%Math.max(1,S.evo.every))!==0)return;let rate=S.evo.rate*(t.evolveAmt/100);if(S.form.on)rate*=S.cur.evolve/100;if(S.mode==="AMBIENT")rate/=4;if(rand100()<rate)mutateTrack(ti,"EVOLVE")}
+function evolveHarmony(){if(!S.evo.targets.harmony||!S.harmDrift||frozen)return;if(rand100()<Math.max(2,S.evo.rate/3)){const deg=scaleDegs();const shift=deg[randBelow(deg.length)];const old=NOTE_NAME[S.root];S.root=(S.root+shift)%12;logEvo("EVOLVE","ROOT "+old+" → "+NOTE_NAME[S.root]+" (moved by a scale degree)");const rs=document.getElementById("rootSel");if(rs)rs.value=String(S.root)}}
+
+/* ================= AUDIO ================= */
+let AC=null,busIn,shaper,mFilter,mGain,compNode,analyser,recDest,trackNodes=[],dlyIn,revIn,choGainNode,noiseBuf=null,ksCache=new Map(),midiOut=null,playedEvents=[];
+function makeDriveCurve(amt){const n=256,c=new Float32Array(n),k=amt/100*40;for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=(1+k)*x/(1+k*Math.abs(x))}return c}
+function impulseBuffer(size){const dur=0.4+(size/100)*5.5,len=Math.floor(AC.sampleRate*dur),buf=AC.createBuffer(2,len,AC.sampleRate);for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2+(100-size)/40)}return buf}
+function initAudio(){if(AC)return;AC=new (window.AudioContext||window.webkitAudioContext)({latencyHint:"interactive"});
+  busIn=AC.createGain();shaper=AC.createWaveShaper();shaper.curve=makeDriveCurve(S.drv);mFilter=AC.createBiquadFilter();mFilter.type="lowpass";mFilter.frequency.value=18000;mGain=AC.createGain();mGain.gain.value=S.master/100*1.4;compNode=AC.createDynamicsCompressor();compNode.threshold.value=-14;compNode.ratio.value=6;analyser=AC.createAnalyser();analyser.fftSize=2048;recDest=AC.createMediaStreamDestination();
+  busIn.connect(shaper);shaper.connect(mFilter);mFilter.connect(mGain);mGain.connect(compNode);compNode.connect(analyser);analyser.connect(AC.destination);compNode.connect(recDest);
+  // chorus (parallel, modulated delay)
+  const choDelay=AC.createDelay(0.1);choDelay.delayTime.value=0.022;const choLFO=AC.createOscillator();choLFO.frequency.value=0.4;const choDepth=AC.createGain();choDepth.gain.value=0.006;choLFO.connect(choDepth);choDepth.connect(choDelay.delayTime);choLFO.start();choGainNode=AC.createGain();choGainNode.gain.value=0;busIn.connect(choDelay);choDelay.connect(choGainNode);choGainNode.connect(shaper);AC._choLFO=choLFO;
+  // delay (stereo, cross-feedback capable)
+  dlyIn=AC.createGain();const split=AC.createChannelSplitter(2),merge=AC.createChannelMerger(2);const dL=AC.createDelay(2),dR=AC.createDelay(2);const fb=AC.createGain();fb.gain.value=S.dly.fb/100;const fbF=AC.createBiquadFilter();fbF.type="lowpass";fbF.frequency.value=2600;const dOut=AC.createGain();dOut.gain.value=S.dly.mix/100;
+  dlyIn.connect(split);split.connect(dL,0);split.connect(dR,1);dL.connect(merge,0,0);dR.connect(merge,0,1);merge.connect(dOut);dOut.connect(busIn);
+  merge.connect(fbF);fbF.connect(fb);fb.connect(dL);fb.connect(dR);AC._dly={dL,dR,fb,fbF,dOut};setDelayTime();
+  // reverb
+  revIn=AC.createGain();const revF=AC.createBiquadFilter();revF.type="lowpass";revF.frequency.value=5200;const conv=AC.createConvolver();conv.buffer=impulseBuffer(S.rev.size);const revOut=AC.createGain();revOut.gain.value=S.rev.mix/100;revIn.connect(revF);revF.connect(conv);conv.connect(revOut);revOut.connect(busIn);AC._rev={conv,revOut};
+  trackNodes=S.tracks.map(()=>{const g=AC.createGain();g.connect(busIn);return g});
+  noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+  drawScope()}
+function wireDelayFB(){const D=AC._dly;try{D.fbSplit.disconnect()}catch(e){}try{D.fbMerge.disconnect()}catch(e){} // simple mono-ish feedback: merger output already feeds fb chain; cross routing approximated by swapping via splitter when ping-pong
+  // fb output goes back into both delays (through a gain stage splitter in graph: use direct connects)
+  }
+function setDelayTime(){if(!AC||!AC._dly)return;const stepSec=60/S.bpm/4;const t=Math.min(1.9,stepSec*DFRAC_STEPS[S.dly.frac]*(S.form.on?1:1));AC._dly.dL.delayTime.setTargetAtTime(t,AC.currentTime,0.05);AC._dly.dR.delayTime.setTargetAtTime(S.dly.pp?t*0.75:t,AC.currentTime,0.05)}
+function adsrTimes(t){return{atk:0.003+Math.pow(t.attack/100,2)*1.6,dec:0.04+Math.pow(t.decay/100,2)*1.8,sus:Math.max(0.02,t.sustain/100),rel:0.02+Math.pow(t.release/100,2)*2.2}}
+function ksBuffer(freq,t,dur){const key=Math.round(freq)+"|"+t.engine+"|"+t.variant+"|"+Math.round(t.decay/10)+"|"+Math.round(t.knobA/10);if(ksCache.has(key))return ksCache.get(key);const sr=AC.sampleRate,L=Math.max(2,Math.round(sr/freq)),len=Math.floor(sr*Math.min(dur,4)),buf=AC.createBuffer(1,len,sr),out=buf.getChannelData(0);const ring=new Float32Array(L);const smooth=t.engine==="STRING"?t.variant!==0:t.variant!==1;let prev=0;for(let i=0;i<L;i++){let w=Math.random()*2-1;if(smooth){w=0.5*(w+prev);prev=w}ring[i]=w}
+  const fbBase=t.engine==="STRING"?[0.998,0.9985,0.9993][t.variant]:[0.996,0.997,0.9985][t.variant];const damp=1-(t.knobA/100)*0.004;const fb=Math.min(0.9995,fbBase*damp+ (t.decay/100)*0.0008);const blend=0.5-(t.knobB/100)*0.25;let idx=0;for(let i=0;i<len;i++){const cur=ring[idx],nxt=ring[(idx+1)%L];out[i]=cur;ring[idx]=fb*((1-blend)*cur+blend*0.5*(cur+nxt));idx=(idx+1)%L}
+  if(ksCache.size>60)ksCache.clear();ksCache.set(key,buf);return buf}
+function playNote(ti,note,vel,when,gateSec,deg){if(!AC)return;const t=S.tracks[ti];const f=noteFreq(note);const peak=(vel/127)*(t.level/100)*0.85;const out=AC.createGain();const flt=AC.createBiquadFilter();flt.type="lowpass";flt.frequency.value=120*Math.pow(2,(t.cut/100)*6.6);flt.Q.value=t.res/100*14;const drv=AC.createWaveShaper();drv.curve=makeDriveCurve(t.drive);const pan=AC.createStereoPanner();pan.pan.value=t.pan/50*0.8;out.connect(flt);flt.connect(drv);drv.connect(pan);pan.connect(trackNodes[ti]);
+  if(t.dlySend>0){const sg=AC.createGain();sg.gain.value=t.dlySend/100*(S.form.on?S.cur.fx/100:1);pan.connect(sg);sg.connect(dlyIn)}
+  if(t.revSend>0){const sg=AC.createGain();sg.gain.value=t.revSend/100*(S.form.on?S.cur.fx/100:1);pan.connect(sg);sg.connect(revIn)}
+  const A=adsrTimes(t);const percussive=["FM","BELL","NOISE","DRUM"].includes(t.engine);const g=out;let holdEnd=when+Math.max(gateSec,0.05);
+  if(t.engine==="PLUCK"||t.engine==="STRING"){g.gain.setValueAtTime(peak,when);g.gain.setTargetAtTime(peak*0.85,when,0.4);g.gain.setTargetAtTime(0.0001,when+Math.max(gateSec,A.rel),A.rel/3)}
+  else{g.gain.setValueAtTime(0.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(peak,0.0011),when+A.atk);g.gain.exponentialRampToValueAtTime(Math.max(peak*A.sus,0.0011),when+A.atk+A.dec);if(percussive)g.gain.exponentialRampToValueAtTime(0.0011,when+A.atk+A.dec*2.2);g.gain.setValueAtTime(percussive?0.0001:Math.max(peak*A.sus,0.0011),Math.max(when+A.atk+A.dec,holdEnd));g.gain.exponentialRampToValueAtTime(0.0001,holdEnd+A.rel)}
+  const stopAt=holdEnd+A.rel+0.35;const oscs=[];function osc(type,freq){const o=AC.createOscillator();o.type=type;o.frequency.value=freq;oscs.push(o);return o}
+  function noiseSrc(){const s=AC.createBufferSource();s.buffer=noiseBuf;s.loop=true;oscs.push(s);return s}
+  function glideFreq(o,ff){if(t.glide>2&&t.lastFreq){o.frequency.setValueAtTime(t.lastFreq,when);o.frequency.exponentialRampToValueAtTime(ff,when+(t.glide/100)*0.35)}else o.frequency.setValueAtTime(ff,when)}
+  const v=t.variant;
+  if(t.engine==="FM"||t.engine==="BELL"){const ratio=t.engine==="BELL"?[5.07,3.76,7.9][v]:[0.5,1,2,3.5][Math.round(t.knobA/100*3)]||2;const car=osc("sine",f);const mod=osc("sine",f*(t.engine==="BELL"?ratio:[2,3.5,0.5][v]));const mg=AC.createGain();const amt=(t.knobB/100)*3.2+0.4;mg.gain.setValueAtTime(f*amt,when);mg.gain.exponentialRampToValueAtTime(Math.max(1,f*0.02),when+(t.engine==="BELL"?1.2:0.35));mod.connect(mg);mg.connect(car.frequency);car.connect(g);oscs.forEach(o=>{o.start(when);o.stop(stopAt)})}
+  else if(t.engine==="SUBTRACT"){const o=osc(v===1?"square":"sawtooth",f);glideFreq(o,f);const fe=AC.createGain();if(v===2){const sub=osc("sine",f/2);const sg2=AC.createGain();sg2.gain.value=0.7;sub.connect(sg2);sg2.connect(g);sub.start(when);sub.stop(stopAt)}const fltAmt=t.knobA/100;flt.frequency.setValueAtTime(120*Math.pow(2,(t.cut/100)*6.6)*(1+fltAmt*3),when);flt.frequency.exponentialRampToValueAtTime(Math.max(80,120*Math.pow(2,(t.cut/100)*6.6)),when+A.dec+0.1);o.connect(g);o.start(when);o.stop(stopAt)}
+  else if(t.engine==="NOISE"){const s=noiseSrc();const bp=AC.createBiquadFilter();bp.type="bandpass";bp.frequency.value=300*Math.pow(2,(t.knobA/100)*4.5)*(v===2?0.3:1);bp.Q.value=0.6+(t.knobB/100)*14;s.connect(bp);bp.connect(g);s.start(when);s.stop(stopAt)}
+  else if(t.engine==="PLUCK"||t.engine==="STRING"){const src=AC.createBufferSource();src.buffer=ksBuffer(f,t,3.5);src.connect(g);src.start(when);src.stop(when+Math.min(4,Math.max(gateSec+A.rel,1)))}
+  else if(t.engine==="PAD"){const det=(t.knobA/100)*24;[-1,0,1].forEach(k=>{const o=osc("sawtooth",f);o.detune.value=k*det;o.connect(g);o.start(when);o.stop(stopAt)});if(v===2){const sub=osc("sine",f/2);const sg2=AC.createGain();sg2.gain.value=0.4;sub.connect(sg2);sg2.connect(g);sub.start(when);sub.stop(stopAt)}const lfo=AC.createOscillator();lfo.frequency.value=0.07+(t.knobB/100)*0.5;const lg=AC.createGain();lg.gain.value=flt.frequency.value*0.25;lfo.connect(lg);lg.connect(flt.frequency);lfo.start(when);lfo.stop(stopAt);oscs.push(lfo)}
+  else if(t.engine==="BASS"){const sine=osc("sine",f);glideFreq(sine,f);const sq=osc("square",f);glideFreq(sq,f);const sqg=AC.createGain();sqg.gain.value=t.knobB/100*0.7;sine.connect(g);sq.connect(sqg);sqg.connect(g);sine.start(when);sq.start(when);sine.stop(stopAt);sq.stop(stopAt)}
+  else if(t.engine==="CHORD"){const degs=v===2?[deg,deg+4,deg+7]:[deg,deg+2,deg+4];const strum=(t.knobB/100)*0.08;degs.forEach((d,ix)=>{const o=osc("sawtooth",noteFreq(degreeToNote(t,d)));o.connect(g);o.start(when+ix*strum);o.stop(stopAt)})}
+  else if(t.engine==="STRING"){/* handled above */}
+  else if(t.engine==="DRUM"){const o=osc("sine",f);const drop=60+(t.knobA/100)*260;o.frequency.setValueAtTime(f+drop,when);o.frequency.exponentialRampToValueAtTime(Math.max(30,f*0.5),when+0.12);o.connect(g);o.start(when);o.stop(stopAt);if(t.knobB>4||v!==0){const s=noiseSrc();const hp=AC.createBiquadFilter();hp.type="highpass";hp.frequency.value=v===2?6000:1800;const ng=AC.createGain();ng.gain.setValueAtTime((t.knobB/100)*0.8,when);ng.gain.exponentialRampToValueAtTime(0.001,when+(v===2?0.06:0.16));s.connect(hp);hp.connect(ng);ng.connect(g);s.start(when);s.stop(when+0.3)}}
+  else{ /* WAVETABLE */ const fold=AC.createWaveShaper();const fc2=new Float32Array(256);const fa=1+(t.knobA/100)*8;for(let i=0;i<256;i++){const x=i/255*2-1;fc2[i]=Math.tanh(fa*x)}fold.curve=fc2;[0,7].forEach(dt=>{const o=osc("sawtooth",f);o.detune.value=dt*(t.knobB/100);o.connect(fold);o.start(when);o.stop(stopAt)});fold.connect(g)}
+  t.lastFreq=f;
+  if(midiOut){midiSendAt([0x90|ti,note,vel],when);midiSendAt([0x80|ti,note,0],when+Math.max(0.06,gateSec))}
+  playedEvents.push({step:S.stepCtr,track:ti,note,vel,dur:Math.max(1,Math.round(gateSec/(60/S.bpm/4)))})}
+function auditionTrack(ti){initAudio();if(AC.state==="suspended")AC.resume();const t=S.tracks[ti];const deg=t.gen==="WALK"?t.walkDeg:(t.degMap[t.pos]||0);playNote(ti,degreeToNote(t,deg),110,AC.currentTime+0.02,(60/S.bpm/4)*(t.gate/100),deg)}
+
+/* ================= SCHEDULER ================= */
+let schedTimer=null,nextStepTime=0,endingSteps=0;
+function midiSendAt(bytes,when){if(!midiOut)return;const dt=(when&&AC)?Math.max(0,(when-AC.currentTime)*1000):0;setTimeout(()=>{try{midiOut.send(bytes)}catch(e){}},dt)}
+function stepSec(){return 60/S.bpm/4}
+function scheduleStep(g,when){if(midiOut)for(let k=0;k<6;k++)midiSendAt([0xF8],when+k*stepSec()/6);
+  if(g>0&&g%16===0){onBar();evolveHarmony();if(S.ending){endingSteps++;if(endingSteps===1&&AC&&mGain)mGain.gain.setTargetAtTime(0.0001,AC.currentTime,stepSec()*4)}}
+  S.tracks.forEach((t,ti)=>{const pos=g%t.len;
+    if(pos===0&&g>0){if(t.gen==="AUTOMATA")t.ca=caNext(t.ca,t.param,t.len);if(t.gen==="TURING"){const popped=t.turing[t.turing.length-1]||0;const nb=rand100()<t.param?(1-popped):popped;t.turing.pop();t.turing.unshift(nb)}if(t.gen==="FUNC"&&S.evo.rate)t.funcPhase+=0.011*S.evo.rate*0.1;evolveCheck(ti);rollCycle(t,ti)}
+    t.pos=pos;
+    let gate=t.gateMap[pos];if(t.ovr[pos]===1)gate=1;if(t.ovr[pos]===2)gate=0;
+    const dirMute=S.form.on&&ti>=S.dirActive;const anySolo=S.tracks.some(x=>x.solo);
+    if(!gate||t.mute||dirMute||(anySolo&&!t.solo))return;
+    if(S.mode==="AMBIENT"&&rand100()<30)return;
+    let deg,note;if(t.gen==="WALK"){const range=scaleDegs().length*2;const st=1+randBelow(Math.max(1,t.param));let d=t.walkDeg+(randBelow(2)?st:-st);if(d<0)d=-d;if(d>=range)d=2*range-2-d;t.walkDeg=clamp(d,0,range-1);deg=t.walkDeg;note=degreeToNote(t,deg)}else{deg=t.degMap[pos]||0;note=degreeToNote(t,deg)}
+    const swingOff=(pos%2===1)?(S.swing/100)*stepSec():0;const at=when+(t.micro+20)/1000+swingOff;
+    let gateSec=stepSec()*(t.gate/100);if(S.mode==="AMBIENT")gateSec*=2;if(S.mode==="DENSE")gateSec*=0.7;gateSec=clamp(gateSec,0.03,stepSec()*16);
+    const vel=t.velMap[pos]||95;playNote(ti,note,vel,at,gateSec,deg);t.hitCtr++;
+    if(t.cond&&rand100()<t.cond){const tgt=t.condTarget==="random"?randBelow(8):(ti+1)%8;if(tgt!==ti)setTimeout(()=>mutateTrack(tgt,"COND T"+(ti+1)),0)}
+    if(t.ratchet&&rand100()<t.ratchet){playNote(ti,note,Math.round(vel*0.75),at+stepSec()*0.5,gateSec*0.5,deg);if(rand()<0.4)playNote(ti,note,Math.round(vel*0.6),at+stepSec()*0.75,gateSec*0.4,deg)}
+    const dt=Math.max(0,(at-AC.currentTime)*1000);setTimeout(()=>highlight(ti),dt)});
+  S.stepCtr=g+1;
+  const bb=document.getElementById("barVal");if(bb)bb.textContent=S.totBar}
+function highlight(ti){const t=S.tracks[ti];const grid=document.getElementById("grid"+ti);if(!grid)return;const cells=grid.children;for(let i=0;i<cells.length;i++){cells[i].classList.toggle("now",i===t.pos);cells[i].classList.toggle("gate",!!t.gateMap[i]);cells[i].classList.toggle("acc",(t.velMap[i]||0)>=110)}}
+function startTransport(){initAudio();if(AC.state==="suspended")AC.resume();applyFxToAudio();if(S.playing)return;S.playing=true;playedEvents=[];endingSteps=0;S.stepCtr=0;formRebuild();formApplySection();orbitOrigin=S.tracks.map(t=>serializeTrack(t));S.tracks.forEach((t,ti)=>rollCycle(t,ti));nextStepTime=AC.currentTime+0.08;midiSendAt([0xFA],nextStepTime);let g=0;scheduleStep(g++,nextStepTime);schedTimer=setInterval(()=>{while(nextStepTime<AC.currentTime+0.14){nextStepTime+=stepSec();scheduleStep(g++,nextStepTime);if(S.ending&&endingSteps>=2){stopTransport();break}}},25);const b=document.getElementById("playBtn");b.textContent="■ STOP";b.classList.add("playing");logEvo("TRANSPORT","Play — seed "+S.seed.toString(16).toUpperCase()+", arc "+S.form.arc)}
+function stopTransport(){if(schedTimer)clearInterval(schedTimer);schedTimer=null;S.playing=false;S.ending=false;if(midiOut){try{midiOut.send([0xFC]);for(let ch=0;ch<8;ch++)midiOut.send([0xB0|ch,123,0])}catch(e){}}const b=document.getElementById("playBtn");if(b){b.textContent="▶ PLAY";b.classList.remove("playing")}document.querySelectorAll(".cell.now").forEach(c=>c.classList.remove("now"))}
+function drawScope(){const cv=document.getElementById("scope");if(!cv)return;const ctx=cv.getContext("2d");function frame(){requestAnimationFrame(frame);ctx.fillStyle="#0a0b09";ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle="#23251d";ctx.beginPath();ctx.moveTo(0,cv.height/2);ctx.lineTo(cv.width,cv.height/2);ctx.stroke();if(!analyser)return;const data=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(data);ctx.strokeStyle="#b7f542";ctx.lineWidth=1.6;ctx.beginPath();const step=Math.floor(data.length/cv.width);for(let x=0;x<cv.width;x++){const y=(data[x*step]/255)*cv.height;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}frame()}
+
+/* ================= TRACK UI ================= */
+const tracksEl=document.getElementById("tracks");
+function slider(ti,k,lab,min,max){const t=S.tracks[ti];return '<div class="ctl"><label>'+lab+' <span class="v" data-lab="'+ti+':'+k+'">'+t[k]+'</span></label><input type="range" min="'+min+'" max="'+max+'" value="'+t[k]+'" data-ti="'+ti+'" data-k="'+k+'"></div>'}
+function selOpts(list,cur){return list.map(x=>'<option value="'+x+'"'+(x===cur?" selected":"")+'>'+x+'</option>').join("")}
+function cardHTML(t,ti){const pd=PARAM_DEF[t.gen];const kl=KNOB_LABELS[t.engine];
+  return '<div class="track'+(t.mute?" muted":"")+(t.lock?" locked":"")+'" id="card'+ti+'">'
+  +'<div class="thead"><span class="tname">T'+(ti+1)+'</span>'
+  +'<select data-ti="'+ti+'" data-sk="gen" title="Generator — where the notes come from">'+selOpts(GEN,t.gen)+'</select>'
+  +'<select data-ti="'+ti+'" data-sk="engine" title="Engine — what the notes sound like">'+selOpts(ENG,t.engine)+'</select>'
+  +'<select data-ti="'+ti+'" data-sk="variant" title="Variant — a curated tuning of the engine">'+ENG_VAR[ENG.indexOf(t.engine)].map((x,i)=>'<option value="'+i+'"'+(i===t.variant?" selected":"")+'>'+x+'</option>').join("")+'</select>'
+  +'<button class="small" data-act="audition" data-ti="'+ti+'">▶ Audition</button>'
+  +'<button class="small'+(t.mute?" on":"")+'" data-act="mute" data-ti="'+ti+'">'+(t.mute?"Muted":"Mute")+'</button>'
+  +'<button class="small'+(t.solo?" on":"")+'" data-act="solo" data-ti="'+ti+'">Solo</button>'
+  +'<button class="small'+(t.lock?" on":"")+'" data-act="lock" data-ti="'+ti+'" title="Lock: evolution and conditional mutation cannot touch this track">'+(t.lock?"🔒 Locked":"🔓 Lock")+'</button></div>'
+  +'<div class="grid32" id="grid'+ti+'">'+Array.from({length:t.len},(_,s)=>'<button class="cell'+(s%4===0?" beat":"")+(t.gateMap[s]?" gate":"")+((t.velMap[s]||0)>=110?" acc":"")+(t.ovr[s]===1?" ovrOn":t.ovr[s]===2?" ovrOff":"")+'" data-cell="'+ti+':'+s+'" title="Step '+(s+1)+' — click: auto → forced ON → forced OFF"></button>').join("")+'</div>'
+  +'<div class="small-note">Steps: white outline = playing now · filled = gate · blue ring = forced ON · red ring = forced OFF (click a step to cycle)</div>'
+  +'<div class="ctlrow" style="margin-top:8px">'+slider(ti,"density","Density %",0,100)+slider(ti,"param",pd.label,pd.min,pd.max)+slider(ti,"len","Length (steps)",1,32)+slider(ti,"octave","Octave",-2,2)+slider(ti,"level","Level",0,100)+slider(ti,"pan","Pan",-50,50)+'</div>'
+  +'<details data-det="'+ti+':sound"><summary>Sound design — ADSR, filter, engine knobs</summary><div class="ctlrow">'
+  +slider(ti,"tune","Tune (semitones)",-12,12)+slider(ti,"gate","Gate % (note length)",10,400)+slider(ti,"attack","Attack",0,100)+slider(ti,"decay","Decay",0,100)+slider(ti,"sustain","Sustain",0,100)+slider(ti,"release","Release",0,100)+slider(ti,"cut","Filter cutoff",0,100)+slider(ti,"res","Filter resonance",0,100)+slider(ti,"drive","Drive",0,100)+slider(ti,"glide","Glide",0,100)+slider(ti,"knobA",kl[0],0,100)+slider(ti,"knobB",kl[1],0,100)+'</div></details>'
+  +'<details data-det="'+ti+':seq"><summary>Sequence &amp; evolution — ratchet, conditional mutation, sends</summary><div class="ctlrow">'
+  +slider(ti,"ratchet","Ratchet %",0,90)+slider(ti,"cond","Cond. mutate % (when this track fires)",0,100)+slider(ti,"micro","Micro-timing (ms)",-20,20)+slider(ti,"evolveAmt","This track\'s Evolve %",0,200)+slider(ti,"dlySend","Delay send",0,100)+slider(ti,"revSend","Reverb send",0,100)+'</div>'
+  +'<div class="ctl" style="max-width:260px;margin-top:6px"><label>Conditional mutation target</label><select data-ti="'+ti+'" data-sk="condTarget"><option value="next"'+(t.condTarget==="next"?" selected":"")+'>Next track</option><option value="random"'+(t.condTarget==="random"?" selected":"")+'>Random track</option></select></div></details>'
+  +'</div>'}
+let openDets=new Set();
+function buildTracks(){openDets=new Set([...document.querySelectorAll("details[data-det]")].filter(d=>d.open).map(d=>d.dataset.det));tracksEl.innerHTML=S.tracks.map((t,ti)=>cardHTML(t,ti)).join("");document.querySelectorAll("details[data-det]").forEach(d=>{if(openDets.has(d.dataset.det))d.open=true})}
+function refreshTrackCard(ti){const t=S.tracks[ti];const card=document.getElementById("card"+ti);if(!card)return;card.querySelectorAll("input[type=range][data-ti]").forEach(inp=>{const k=inp.dataset.k;inp.value=t[k];const lab=card.querySelector('[data-lab="'+ti+':'+k+'"]');if(lab)lab.textContent=t[k]});card.querySelectorAll("select[data-ti]").forEach(s=>{const k=s.dataset.sk;if(k&&t[k]!==undefined)s.value=String(t[k])});const grid=document.getElementById("grid"+ti);if(grid&&grid.children.length!==t.len){buildTracks();return}if(grid)for(let i=0;i<grid.children.length;i++){grid.children[i].className="cell"+(i%4===0?" beat":"")+(t.gateMap[i]?" gate":"")+((t.velMap[i]||0)>=110?" acc":"")+(t.ovr[i]===1?" ovrOn":t.ovr[i]===2?" ovrOff":"")}}
+tracksEl.addEventListener("input",e=>{const inp=e.target;if(inp.matches("input[type=range]")){const ti=+inp.dataset.ti,k=inp.dataset.k;S.tracks[ti][k]=+inp.value;const lab=tracksEl.querySelector('[data-lab="'+ti+':'+k+'"]');if(lab)lab.textContent=inp.value;if(k==="len"){genSeedSoft(S.tracks[ti]);rollCycle(S.tracks[ti],ti);buildTracks()}if(k==="param"&&(S.tracks[ti].gen==="AUTOMATA")){genSeed(S.tracks[ti]);rollCycle(S.tracks[ti],ti);refreshTrackCard(ti)}}});
+tracksEl.addEventListener("change",e=>{const s=e.target;if(s.matches("select[data-sk]")){const ti=+s.dataset.ti,k=s.dataset.sk,t=S.tracks[ti];if(k==="variant")t.variant=+s.value;else if(k==="condTarget")t.condTarget=s.value;else if(k==="gen"){t.gen=s.value;t.param=PARAM_DEF[t.gen].def;srand((S.seed^(ti*7919)^(Date.now()&0xffff))|1);genSeed(t);rollCycle(t,ti);buildTracks()}else if(k==="engine"){t.engine=s.value;t.variant=0;buildTracks()}}});
+tracksEl.addEventListener("click",e=>{const cell=e.target.closest("[data-cell]");if(cell){const [ti,s]=cell.dataset.cell.split(":").map(Number);const t=S.tracks[ti];t.ovr[s]=(t.ovr[s]+1)%3;refreshTrackCard(ti);return}const btn=e.target.closest("[data-act]");if(!btn)return;const ti=+btn.dataset.ti,t=S.tracks[ti];if(btn.dataset.act==="mute"){t.mute=!t.mute;buildTracks()}if(btn.dataset.act==="solo"){t.solo=!t.solo;buildTracks()}if(btn.dataset.act==="lock"){t.lock=!t.lock;buildTracks()}if(btn.dataset.act==="audition")auditionTrack(ti)});
+
+/* ================= FORM UI ================= */
+function renderFormBar(){const bar=document.getElementById("formBar");if(!bar)return;const a=arcSecs();bar.innerHTML=a.map((s,i)=>'<div class="seg'+(i===S.secIdx&&S.form.on?" cur":"")+'" style="flex:'+Math.max(1,S.secBars[i]||s[1])+'">'+s[0]+'</div>').join("");updateFormUI()}
+function updateFormUI(){const sv=document.getElementById("secVal");if(sv)sv.textContent=S.form.on?secDef()[0]:"—";const fill=document.getElementById("formProgFill");if(fill)fill.style.width=(S.totBars?clamp(S.totBar/S.totBars*100,0,100):0)+"%";const note=document.getElementById("formNote");if(note)note.textContent=S.form.on?("Section "+(S.secIdx+1)+" of "+arcSecs().length+" · bar "+S.totBar+" of ~"+S.totBars+" · morph now: density ×"+Math.round(S.cur.dens)+"% · evolve ×"+Math.round(S.cur.evolve)+"% · FX ×"+Math.round(S.cur.fx)+"% · "+S.dirActive+" of 8 tracks active"):"Director off — all 8 tracks play, no morphing.";const dot=document.getElementById("formDot");if(dot)dot.className="dot"+(S.form.on?"":" off");const bar2=document.getElementById("formBar");if(bar2)[...bar2.children].forEach((el,i)=>el.classList.toggle("cur",i===S.secIdx&&S.form.on))}
+function renderSecEditor(){const box=document.getElementById("secEditor");if(!box)return;if(S.form.arc!=="CUSTOM"||!S.customSecs){box.innerHTML='<div class="small-note">No custom arc yet — use the copy button above.</div>';return}
+  box.innerHTML='<div class="secRow secHead"><span>Section name</span><span>Weight</span><span>Energy</span><span>Density</span><span>Evolve</span><span>FX</span><span>Tonic shift</span><span>Recall §</span><span></span></div>'+S.customSecs.map((s,i)=>'<div class="secRow"><input data-sec="'+i+':0" value="'+s[0]+'"><input type="number" data-sec="'+i+':1" value="'+s[1]+'"><input type="number" data-sec="'+i+':2" value="'+s[2]+'"><input type="number" data-sec="'+i+':3" value="'+s[3]+'"><input type="number" data-sec="'+i+':4" value="'+s[4]+'"><input type="number" data-sec="'+i+':5" value="'+s[5]+'"><input type="number" data-sec="'+i+':6" value="'+s[6]+'"><input type="number" data-sec="'+i+':7" value="'+(s[7]+1)+'"><button class="small" data-delSec="'+i+'">✕</button></div>').join("")}
+document.getElementById("secEditor").addEventListener("input",e=>{const inp=e.target;if(!inp.dataset||!inp.dataset.sec)return;const [i,k]=inp.dataset.sec.split(":").map(Number);if(!S.customSecs||!S.customSecs[i])return;S.customSecs[i][k]=k===0?inp.value:(+inp.value||0);if(k===7)S.customSecs[i][7]=(+inp.value||0)-1;formRebuild()});
+document.getElementById("secEditor").addEventListener("click",e=>{const b=e.target.closest("[data-delSec]");if(b){S.customSecs.splice(+b.dataset.delSec,1);renderSecEditor();formRebuild()}});
+
+/* ================= PRESETS ================= */
+/* First 4 tracks of the 8 originals are the exact PyGamer factory data
+   (gen/engine/variant/len/density/param/octave/gate/pan/attack/decay/send/
+   ratchet/cond/micro/level, seed, bpm, root, scale, mode, arc, FX globals).
+   Tracks 5–8 are web expansion tracks in the same character. */
+function ot(a){return{gen:a[0],engine:a[1],variant:a[2],len:a[3],density:a[4],param:a[5],octave:a[6],gate:a[7],pan:a[8],attack:clamp(Math.round((a[9]-40)/3),2,80),decay:clamp(Math.round(a[10]/2.2),10,95),sustain:25,level:Math.round(a[15]/127*100),dlySend:Math.round(a[11]*0.45),revSend:Math.round(a[11]*0.75),ratchet:a[12],cond:a[13],micro:a[14]}}
+function extraFor(kind){const E={
+ambient:[{gen:"PROB",engine:"BELL",variant:2,len:24,density:16,param:8,octave:1,gate:220,revSend:70,level:70},{gen:"WALK",engine:"STRING",variant:1,len:28,density:24,param:2,octave:0,gate:300,revSend:65,level:75},{gen:"PROB",engine:"NOISE",variant:2,len:32,density:14,param:6,octave:0,gate:180,revSend:50,level:45},{gen:"MARKOV",engine:"PAD",variant:1,len:16,density:30,param:2,octave:-1,gate:320,revSend:72,level:70}],
+drive:[{gen:"EUCLID",engine:"DRUM",variant:0,len:16,density:62,param:2,octave:-1,gate:60,level:95,knobA:70,knobB:20},{gen:"EUCLID",engine:"DRUM",variant:2,len:16,density:38,param:5,octave:1,gate:40,level:60,knobB:80},{gen:"PROB",engine:"WAVETABLE",variant:0,len:12,density:40,param:7,octave:0,gate:90,level:70},{gen:"MARKOV",engine:"BELL",variant:1,len:20,density:26,param:3,octave:1,gate:110,revSend:50,level:65}],
+melodic:[{gen:"WALK",engine:"PLUCK",variant:2,len:16,density:48,param:2,octave:1,gate:100,revSend:45,level:80},{gen:"PROB",engine:"CHORD",variant:1,len:8,density:50,param:6,octave:0,gate:220,revSend:50,level:75},{gen:"EUCLID",engine:"PAD",variant:0,len:24,density:22,param:4,octave:0,gate:300,revSend:60,level:60},{gen:"MARKOV",engine:"BELL",variant:0,len:12,density:42,param:3,octave:1,gate:100,revSend:55,level:75}],
+dark:[{gen:"AUTOMATA",engine:"STRING",variant:0,len:20,density:30,param:30,octave:-1,gate:280,revSend:70,level:75},{gen:"FUNC",engine:"NOISE",variant:2,len:24,density:26,param:2,octave:0,gate:160,revSend:45,level:55},{gen:"WALK",engine:"BASS",variant:2,len:14,density:36,param:2,octave:-1,gate:140,level:85},{gen:"LOGISTIC",engine:"DRUM",variant:1,len:16,density:30,param:55,octave:0,gate:60,level:55}],
+play:[{gen:"EUCLID",engine:"DRUM",variant:0,len:12,density:58,param:3,octave:-1,gate:60,level:90},{gen:"FUNC",engine:"WAVETABLE",variant:2,len:16,density:52,param:1,octave:0,gate:80,level:70},{gen:"PROB",engine:"FM",variant:2,len:8,density:55,param:11,octave:1,gate:70,level:75},{gen:"MARKOV",engine:"PLUCK",variant:0,len:12,density:50,param:4,octave:1,gate:90,revSend:40,level:80}]};return (E[kind]||E.melodic).map(o=>Object.assign({},o))}
+const PRESETS=[
+{name:"GLASS GARDEN",desc:"Ambient — walk pad, chord swells, glass bells",kind:"ambient",seed:0x6A55,bpm:72,root:2,scale:"MINOR",evolve:18,mode:"AMBIENT",form:{on:true,target:10,arc:"DRIFT",end:"LOOP"},dly:{frac:4,fb:45,mix:55},rev:{size:78,mix:67},tr:[["WALK","PAD",0,24,30,2,0,300,-30,150,150,90,0,10,0,112],["FUNC","CHORD",1,16,35,0,0,250,20,130,140,85,0,10,0,112],["PROB","BELL",0,12,22,9,1,120,35,100,160,80,0,10,0,112],["EUCLID","STRING",1,14,28,3,-1,200,-10,120,150,70,0,10,0,112]]},
+{name:"DEEP FIELD",desc:"Ambient drone — automata pads, bowed strings",kind:"ambient",seed:0xD33F,bpm:60,root:7,scale:"DORIAN",evolve:12,mode:"AMBIENT",form:{on:true,target:15,arc:"DRIFT",end:"LOOP"},dly:{frac:4,fb:55,mix:47},rev:{size:88,mix:71},tr:[["AUTOMATA","PAD",2,16,40,90,-1,400,-20,200,200,95,0,10,0,112],["WALK","PAD",0,32,25,2,0,350,25,150,150,90,0,10,0,112],["PROB","CHORD",1,24,20,9,0,300,0,130,140,90,0,10,0,112],["FUNC","STRING",2,20,30,2,-1,300,-35,120,150,85,0,10,0,112]]},
+{name:"KICK THEORY",desc:"Driving — acid bass Euclid, automata hats, BUILD arc",kind:"drive",seed:0x1317,bpm:138,root:0,scale:"MINOR",evolve:30,mode:"SYSTEM",form:{on:true,target:8,arc:"BUILD",end:"STOP"},dly:{frac:3,fb:30,mix:28},rev:{size:40,mix:24},tr:[["EUCLID","BASS",1,16,60,2,-1,90,0,100,100,15,20,25,0,120],["AUTOMATA","NOISE",0,12,50,30,1,60,-25,100,100,45,10,20,0,112],["EUCLID","FM",1,8,45,3,0,80,25,100,100,30,30,20,0,112],["PROB","SUBTRACT",0,16,55,10,0,70,10,100,100,40,10,30,0,112]]},
+{name:"RATCHET CITY",desc:"Glitch — rule-30 crackle, XOR funk, COLLAPSE arc",kind:"drive",seed:0x617C,bpm:150,root:3,scale:"PHRYGIAN",evolve:65,mode:"SYSTEM",form:{on:true,target:8,arc:"COLLAPSE",end:"STOP"},dly:{frac:2,fb:60,mix:43},rev:{size:50,mix:28},tr:[["AUTOMATA","NOISE",1,7,65,30,1,50,-20,100,100,50,45,40,0,112],["FUNC","FM",0,12,70,1,0,60,15,100,100,40,50,35,0,112],["PROB","PLUCK",1,9,60,12,1,70,30,100,100,35,40,20,0,112],["EUCLID","BASS",0,16,50,2,-1,85,0,100,100,15,25,20,0,118]]},
+{name:"LOW ORBIT",desc:"Bass-led — two gliding basses under a mist pad",kind:"drive",seed:0x0B17,bpm:100,root:5,scale:"MINOR",evolve:22,mode:"SYSTEM",form:{on:true,target:10,arc:"BUILD",end:"LOOP"},dly:{frac:3,fb:25,mix:20},rev:{size:45,mix:24},tr:[["EUCLID","BASS",0,16,55,2,-1,110,0,100,110,10,15,20,0,122],["WALK","BASS",2,12,45,2,-1,130,-15,100,100,15,10,20,0,116],["PROB","PAD",0,24,25,9,0,250,25,140,140,80,0,10,0,104],["AUTOMATA","NOISE",2,16,35,90,0,60,10,100,100,35,10,20,0,112]]},
+{name:"CLOCKWORK BELLS",desc:"Melodic — bells and harp plucks, pentatonic, CYCLE arc",kind:"melodic",seed:0xBE11,bpm:112,root:4,scale:"PENTA_MAJ",evolve:28,mode:"SYSTEM",form:{on:true,target:10,arc:"CYCLE",end:"LOOP"},dly:{frac:2,fb:40,mix:35},rev:{size:60,mix:39},tr:[["WALK","BELL",0,16,55,2,1,110,-20,100,130,70,5,15,0,112],["EUCLID","PLUCK",2,12,50,5,0,100,15,100,120,55,10,15,0,112],["FUNC","BELL",1,24,45,0,0,120,30,100,120,65,5,15,0,112],["PROB","CHORD",0,8,40,9,-1,90,0,100,100,40,10,15,0,112]]},
+{name:"BLACK RAIN",desc:"Dark drone — phrygian strings, choir pads, 15-min COLLAPSE",kind:"dark",seed:0xB1AC,bpm:66,root:1,scale:"PHRYGIAN",evolve:15,mode:"AMBIENT",form:{on:true,target:15,arc:"COLLAPSE",end:"STOP"},dly:{frac:5,fb:50,mix:51},rev:{size:85,mix:67},tr:[["AUTOMATA","STRING",0,16,35,30,-1,300,-25,120,160,85,0,10,0,112],["WALK","PAD",1,32,22,2,-1,380,20,180,180,95,0,10,0,112],["PROB","NOISE",2,24,30,9,0,150,35,100,140,60,0,10,0,112],["FUNC","BELL",2,20,25,2,0,200,-10,100,170,80,0,10,0,112]]},
+{name:"TOYSHOP RIOT",desc:"Playful — fast pentatonic plinks and chord stabs, TIDE arc",kind:"play",seed:0x7075,bpm:160,root:0,scale:"PENTA_MAJ",evolve:45,mode:"SYSTEM",form:{on:true,target:5,arc:"TIDE",end:"LOOP"},dly:{frac:1,fb:35,mix:31},rev:{size:45,mix:28},tr:[["PROB","FM",0,8,65,12,1,70,-20,100,100,35,35,20,0,112],["EUCLID","PLUCK",0,12,60,4,1,80,20,100,100,40,15,20,0,112],["FUNC","CHORD",0,16,55,0,0,90,0,100,100,45,10,30,0,112],["AUTOMATA","NOISE",0,10,45,90,2,50,30,100,100,30,30,20,0,112]]},
+{name:"NEON RAIN",desc:"Web-only — logistic-map drums, wavetable rain, Markov bells",kind:"drive",seed:0xC0DE,bpm:124,root:9,scale:"DORIAN",evolve:38,mode:"SYSTEM",form:{on:true,target:8,arc:"SURGE",end:"LOOP"},dly:{frac:2,fb:48,mix:40},rev:{size:62,mix:40},tr:[["LOGISTIC","DRUM",1,16,44,62,-1,60,0,100,100,30,20,20,0,112],["EUCLID","BASS",1,16,52,2,-1,95,-10,100,100,15,15,20,0,116],["MARKOV","BELL",0,20,40,3,1,110,20,100,130,65,5,15,0,112],["FUNC","WAVETABLE",0,24,48,1,0,80,10,100,100,45,15,25,0,108]]},
+{name:"SUBWAY GHOST",desc:"Web-only — Turing loops that slowly forget themselves",kind:"dark",seed:0x6A05,bpm:92,root:6,scale:"HARM_MINOR",evolve:34,mode:"SYSTEM",form:{on:true,target:10,arc:"ORBIT",end:"LOOP"},dly:{frac:4,fb:52,mix:44},rev:{size:70,mix:48},tr:[["TURING","PLUCK",1,16,55,14,0,110,-15,100,120,55,10,20,0,112],["TURING","BASS",0,12,48,9,-1,120,10,100,100,20,10,20,0,114],["PROB","PAD",2,24,20,8,-1,340,25,170,170,85,0,10,0,100],["LOGISTIC","NOISE",0,16,30,48,1,70,-30,100,100,40,25,30,0,104]]},
+{name:"ORCHARD CIRCUIT",desc:"Web-only — bright lydian Markov melody over chord swells",kind:"melodic",seed:0xF00D,bpm:108,root:4,scale:"LYDIAN",evolve:26,mode:"SYSTEM",form:{on:true,target:10,arc:"TIDE",end:"LOOP"},dly:{frac:3,fb:38,mix:36},rev:{size:58,mix:42},tr:[["MARKOV","PLUCK",2,16,52,3,1,100,-10,100,120,55,10,15,0,112],["WALK","CHORD",1,8,46,2,0,230,15,130,140,70,0,10,0,108],["EUCLID","BELL",2,20,30,3,1,130,28,100,150,70,5,10,0,106],["PROB","PAD",0,24,24,7,0,300,-22,160,160,80,0,10,0,98]]},
+{name:"SLOW TELEGRAPH",desc:"Web-only — sparse Morse-like func pulses, long strings",kind:"ambient",seed:0x51AC,bpm:54,root:11,scale:"PENTA_MIN",evolve:14,mode:"AMBIENT",form:{on:true,target:15,arc:"DRIFT",end:"LOOP"},dly:{frac:5,fb:58,mix:50},rev:{size:82,mix:64},tr:[["FUNC","BELL",2,24,22,2,0,240,-18,100,170,80,0,8,0,110],["WALK","STRING",2,28,26,1,-1,340,18,140,170,85,0,8,0,108],["EUCLID","PAD",2,16,20,2,-1,380,0,190,190,90,0,8,0,100],["PROB","NOISE",2,32,12,5,0,200,30,100,140,55,0,8,0,92]]}];
+function loadPreset(ix){const P=PRESETS[ix];if(!P)return;const wasPlaying=S.playing;if(wasPlaying)stopTransport();const keepCustom=S.customSecs;S=freshState();S.customSecs=keepCustom;S.bpm=P.bpm;S.root=P.root;S.scale=P.scale;S.evo.rate=P.evolve;S.mode=P.mode;Object.assign(S.form,P.form);S.dly.frac=P.dly.frac;S.dly.fb=P.dly.fb;S.dly.mix=P.dly.mix;S.rev.size=P.rev.size;S.rev.mix=P.rev.mix;
+  P.tr.map(ot).forEach((o,i)=>Object.assign(S.tracks[i],o));extraFor(P.kind).forEach((o,i)=>Object.assign(S.tracks[4+i],o));
+  reseed(P.seed);syncAllUI();logEvo("PRESET",P.name+" loaded — "+P.desc);if(wasPlaying)startTransport()}
+
+/* ================= SAVE / SHARE / RECORD / MIDI ================= */
+function ioTrack(t){const o=serializeTrack(t);o.gateMap=[...t.gateMap];o.degMap=[...t.degMap];o.velMap=[...t.velMap];o.solo=!!t.solo;return o}
+function serializeSystem(){return{app:"func-machine-web",v:1,bpm:S.bpm,swing:S.swing,master:S.master,root:S.root,scale:S.scale,customScale:[...SCALES.CUSTOM],seed:S.seed,mode:S.mode,harmEvery:S.harmEvery,harmDrift:S.harmDrift,dly:S.dly,rev:S.rev,cho:S.cho,drv:S.drv,mfCut:S.mfCut,form:S.form,customSecs:S.customSecs,evo:S.evo,tracks:S.tracks.map(ioTrack)}}
+function applySystem(o){if(!o||o.app!=="func-machine-web"||!Array.isArray(o.tracks))throw new Error("not a FUNC MACHINE WEB system");const wasPlaying=S.playing;if(wasPlaying)stopTransport();const ns=freshState();for(const k of["bpm","swing","master","root","scale","seed","mode","harmEvery","harmDrift","drv","mfCut","customSecs"])if(o[k]!==undefined)ns[k]=o[k];for(const k of["dly","rev","cho","form","evo"])if(o[k])Object.assign(ns[k],o[k]);if(o.customScale&&o.customScale.length)SCALES.CUSTOM=[...o.customScale];S=ns;o.tracks.slice(0,8).forEach((ot2,i)=>{applySerializedTrack(S.tracks[i],ot2);if(ot2.gateMap){S.tracks[i].gateMap=[...ot2.gateMap];S.tracks[i].degMap=[...ot2.degMap];S.tracks[i].velMap=[...ot2.velMap]}S.tracks[i].solo=!!ot2.solo});srand(S.seed);syncAllUI();logEvo("SYSTEM","Loaded — seed "+S.seed.toString(16).toUpperCase())}
+function download(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+let mediaRec=null,recChunks=[];
+function vlq(v){let b=v&0x7f;const out=[];v>>=7;while(v>0){out.unshift((v&0x7f)|0x80);v>>=7}out.push(b);return out}
+function exportMIDI(){if(!playedEvents.length){document.getElementById("ioNote").textContent="No notes yet — press Play first, let it run, then export.";return}
+  const evs=[];playedEvents.forEach(e=>{evs.push({tick:e.step*24,on:1,note:e.note,vel:e.vel,ch:e.track});evs.push({tick:(e.step+Math.max(1,e.dur))*24,on:0,note:e.note,vel:0,ch:e.track})});evs.sort((a,b)=>a.tick-b.tick||b.on-a.on);
+  let bytes=[],last=0;evs.forEach(e=>{bytes.push(...vlq(e.tick-last));last=e.tick;bytes.push(e.on?0x90|e.ch:0x80|e.ch,e.note,e.vel)});bytes.push(0,0xff,0x2f,0);
+  const trk=[0x4d,0x54,0x72,0x6b,(bytes.length>>>24)&255,(bytes.length>>>16)&255,(bytes.length>>>8)&255,bytes.length&255,...bytes];
+  const hdr=[0x4d,0x54,0x68,0x64,0,0,0,6,0,0,0,1,0,96];download("func-machine.mid",new Blob([new Uint8Array([...hdr,...trk])],{type:"audio/midi"}));document.getElementById("ioNote").textContent="MIDI exported: "+playedEvents.length+" notes played since Play (format 0, channels 1–8 = tracks 1–8, 96 PPQ)."}
+
+/* ================= GLOBAL UI BINDINGS ================= */
+function $(id){return document.getElementById(id)}
+function syncAllUI(){$("bpm").value=S.bpm;$("bpmLab").textContent=S.bpm;$("bpmVal").textContent=S.bpm;$("swing").value=S.swing;$("swingLab").textContent=S.swing+"%";$("master").value=S.master;$("masterLab").textContent=S.master;$("seedVal").textContent=S.seed.toString(16).toUpperCase().padStart(4,"0");
+  $("formOn").value=S.form.on?"1":"0";$("arcSel").value=S.form.arc;$("targetSel").value=String(S.form.target);$("endSel").value=S.form.end;$("modeSel").value=S.mode;$("harmSel").value=String(S.harmEvery);$("rootSel").value=String(S.root);$("scaleSel").value=S.scale;$("harmDrift").value=S.harmDrift?"1":"0";
+  $("evoRate").value=S.evo.rate;$("evoRateLab").textContent=S.evo.rate+"%";$("evoWild").value=S.evo.wild;$("evoWildLab").textContent=S.evo.wild+"%";$("evoEvery").value=String(S.evo.every);$("evoMode").value=S.evo.mode;document.querySelectorAll("#evoTargets input").forEach(c=>c.checked=!!S.evo.targets[c.dataset.tgt]);
+  $("dlyOn").value=S.dly.on?"1":"0";$("dlyFrac").value=String(S.dly.frac);$("dlyFb").value=S.dly.fb;$("dlyFbLab").textContent=S.dly.fb+"%";$("dlyMix").value=S.dly.mix;$("dlyMixLab").textContent=S.dly.mix;$("dlyPP").value=S.dly.pp?"1":"0";$("revOn").value=S.rev.on?"1":"0";$("revSize").value=S.rev.size;$("revSizeLab").textContent=S.rev.size;$("revMix").value=S.rev.mix;$("revMixLab").textContent=S.rev.mix;$("choMix").value=S.cho.mix;$("choMixLab").textContent=S.cho.mix;$("choRate").value=S.cho.rate;$("choRateLab").textContent=S.cho.rate;$("drvAmt").value=S.drv;$("drvLab").textContent=S.drv;$("mfCut").value=S.mfCut;$("mfLab").textContent=S.mfCut;
+  buildCustomScaleBox();buildTracks();renderFormBar();renderSecEditor();applyFxToAudio()}
+function applyFxToAudio(){if(!AC)return;mGain.gain.setTargetAtTime(S.master/100*1.4,AC.currentTime,0.03);shaper.curve=makeDriveCurve(S.drv);mFilter.frequency.setTargetAtTime(200*Math.pow(2,(S.mfCut/100)*6.5),AC.currentTime,0.03);AC._dly.fb.gain.setTargetAtTime(S.dly.fb/100,AC.currentTime,0.03);AC._dly.dOut.gain.setTargetAtTime(S.dly.on?S.dly.mix/100:0,AC.currentTime,0.03);AC._rev.revOut.gain.setTargetAtTime(S.rev.on?S.rev.mix/100:0,AC.currentTime,0.03);choGainNode.gain.setTargetAtTime(S.cho.mix/100*0.5,AC.currentTime,0.05);AC._choLFO.frequency.setTargetAtTime(0.1+(S.cho.rate/100)*2.2,AC.currentTime,0.05);setDelayTime()}
+function buildCustomScaleBox(){const box=$("customScaleBox");box.innerHTML=NOTE_NAME.map((n,i)=>'<label><input type="checkbox" data-note="'+i+'"'+(SCALES.CUSTOM.includes(i)?" checked":"")+'> '+n+'</label>').join("")}
+$("playBtn").addEventListener("click",()=>{S.playing?stopTransport():startTransport()});
+$("bpm").addEventListener("input",e=>{S.bpm=+e.target.value;$("bpmLab").textContent=S.bpm;$("bpmVal").textContent=S.bpm;setDelayTime()});
+$("bpm").addEventListener("change",()=>{if(S.form.on)formRebuild()});
+$("swing").addEventListener("input",e=>{S.swing=+e.target.value;$("swingLab").textContent=S.swing+"%"});
+$("master").addEventListener("input",e=>{S.master=+e.target.value;$("masterLab").textContent=S.master;applyFxToAudio()});
+$("newSeedBtn").addEventListener("click",()=>{const sd=(Math.random()*0xffffff)>>>0;reseed(sd);buildTracks();logEvo("SEED","New seed "+sd.toString(16).toUpperCase()+" — same settings, new piece")});
+$("randBtn").addEventListener("click",()=>{S.tracks.forEach(t=>{t.gen=GEN[Math.floor(Math.random()*GEN.length)];t.engine=ENG[Math.floor(Math.random()*ENG.length)];t.variant=Math.floor(Math.random()*3);t.len=4+Math.floor(Math.random()*29);t.density=15+Math.floor(Math.random()*75);t.param=PARAM_DEF[t.gen].min+Math.floor(Math.random()*(PARAM_DEF[t.gen].max-PARAM_DEF[t.gen].min+1));t.octave=Math.floor(Math.random()*3)-1});const sd=(Math.random()*0xffffff)>>>0;reseed(sd);buildTracks();logEvo("SEED","Randomized system, seed "+sd.toString(16).toUpperCase())});
+$("formOn").addEventListener("change",e=>{S.form.on=e.target.value==="1";formRebuild()});
+$("arcSel").addEventListener("change",e=>{S.form.arc=e.target.value;formRebuild();renderSecEditor()});
+$("targetSel").addEventListener("change",e=>{S.form.target=+e.target.value;formRebuild()});
+$("endSel").addEventListener("change",e=>{S.form.end=e.target.value});
+$("modeSel").addEventListener("change",e=>{S.mode=e.target.value;S.tracks.forEach((t,i)=>rollCycle(t,i));buildTracks()});
+$("harmSel").addEventListener("change",e=>{S.harmEvery=+e.target.value});
+$("rootSel").addEventListener("change",e=>{S.root=+e.target.value});
+$("scaleSel").addEventListener("change",e=>{S.scale=e.target.value;S.tracks.forEach((t,i)=>rollCycle(t,i));buildTracks()});
+$("harmDrift").addEventListener("change",e=>{S.harmDrift=e.target.value==="1"});
+$("customScaleBox").addEventListener("change",e=>{const cb=e.target;if(!cb.dataset||cb.dataset.note===undefined)return;const n=+cb.dataset.note;if(cb.checked&&!SCALES.CUSTOM.includes(n))SCALES.CUSTOM.push(n);if(!cb.checked)SCALES.CUSTOM=SCALES.CUSTOM.filter(x=>x!==n);SCALES.CUSTOM.sort((a,b)=>a-b);if(!SCALES.CUSTOM.length){SCALES.CUSTOM=[0];buildCustomScaleBox()}if(S.scale==="CUSTOM"){S.tracks.forEach((t,i)=>rollCycle(t,i));buildTracks()}});
+$("evoRate").addEventListener("input",e=>{S.evo.rate=+e.target.value;$("evoRateLab").textContent=S.evo.rate+"%"});
+$("evoWild").addEventListener("input",e=>{S.evo.wild=+e.target.value;$("evoWildLab").textContent=S.evo.wild+"%"});
+$("evoEvery").addEventListener("change",e=>{S.evo.every=+e.target.value});
+$("evoMode").addEventListener("change",e=>{S.evo.mode=e.target.value});
+$("evoTargets").addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.tgt)S.evo.targets[e.target.dataset.tgt]=e.target.checked});
+$("evoNowBtn").addEventListener("click",()=>{let n=0;S.tracks.forEach((t,ti)=>{if(!t.lock&&Math.random()<0.85&&mutateTrack(ti,"MANUAL"))n++});if(S.evo.targets.harmony)evolveHarmony();if(!n)logEvo("MANUAL","Nothing evolved — check locks, Freeze, and the WHAT MAY EVOLVE ticks")});
+$("undoEvoBtn").addEventListener("click",()=>{const s=undoStack.pop();if(!s){logEvo("UNDO","Nothing to undo");return}const o=JSON.parse(s);o.tracks.forEach((ot2,i)=>applySerializedTrack(S.tracks[i],ot2));S.root=o.root;S.scale=o.scale;S.tracks.forEach((t,i)=>rollCycle(t,i));syncAllUI();logEvo("UNDO","Last evolution taken back")});
+$("snapABtn").addEventListener("click",()=>{snapA=JSON.stringify(serializeSystem());logEvo("SNAPSHOT","Snapshot A saved")});
+$("snapBBtn").addEventListener("click",()=>{snapB=JSON.stringify(serializeSystem());logEvo("SNAPSHOT","Snapshot B saved")});
+$("snapAGetBtn").addEventListener("click",()=>{if(snapA){applySystem(JSON.parse(snapA));logEvo("SNAPSHOT","Snapshot A recalled")}else logEvo("SNAPSHOT","No Snapshot A yet")});
+$("snapBGetBtn").addEventListener("click",()=>{if(snapB){applySystem(JSON.parse(snapB));logEvo("SNAPSHOT","Snapshot B recalled")}else logEvo("SNAPSHOT","No Snapshot B yet")});
+$("freezeBtn").addEventListener("click",e=>{frozen=!frozen;e.target.classList.toggle("on",frozen);e.target.textContent=frozen?"🧊 Frozen — click to unfreeze":"🧊 Freeze all evolution";logEvo("FREEZE",frozen?"Evolution frozen — the system will hold exactly as it is":"Evolution unfrozen")});
+$("copyArcBtn").addEventListener("click",()=>{S.customSecs=arcSecs().map(s=>[...s]);S.form.arc="CUSTOM";$("arcSel").value="CUSTOM";renderSecEditor();formRebuild();logEvo("FORM","Arc copied to Custom — edit the sections below")});
+$("addSecBtn").addEventListener("click",()=>{if(S.form.arc!=="CUSTOM"||!S.customSecs){S.customSecs=arcSecs().map(s=>[...s]);S.form.arc="CUSTOM";$("arcSel").value="CUSTOM"}S.customSecs.push(["NEW SECTION",1,50,75,50,60,0,-1]);renderSecEditor();formRebuild()});
+[["dlyOn","dly","on","v=>v==='1'"],["dlyFrac","dly","frac","Number"],["dlyFb","dly","fb","Number"],["dlyMix","dly","mix","Number"],["dlyPP","dly","pp","v=>v==='1'"]].forEach(([id,grp,k])=>{$(id).addEventListener("input",e=>{const v=e.target.value;S[grp][k]=(id==="dlyOn"||id==="dlyPP")?v==="1":+v;const lab=$(id+"Lab");if(lab)lab.textContent=v+(id==="dlyFb"?"%":"");applyFxToAudio()})});
+[["revOn","rev","on"],["revSize","rev","size"],["revMix","rev","mix"]].forEach(([id,grp,k])=>{$(id).addEventListener("input",e=>{const v=e.target.value;S[grp][k]=id==="revOn"?v==="1":+v;const lab=$(id+"Lab");if(lab)lab.textContent=v;applyFxToAudio()});$(id).addEventListener("change",()=>{if(AC&&id==="revSize")AC._rev.conv.buffer=impulseBuffer(S.rev.size)})});
+$("choMix").addEventListener("input",e=>{S.cho.mix=+e.target.value;$("choMixLab").textContent=S.cho.mix;applyFxToAudio()});
+$("choRate").addEventListener("input",e=>{S.cho.rate=+e.target.value;$("choRateLab").textContent=S.cho.rate;applyFxToAudio()});
+$("drvAmt").addEventListener("input",e=>{S.drv=+e.target.value;$("drvLab").textContent=S.drv;applyFxToAudio()});
+$("mfCut").addEventListener("input",e=>{S.mfCut=+e.target.value;$("mfLab").textContent=S.mfCut;applyFxToAudio()});
+$("saveBtn").addEventListener("click",()=>download("func-machine-system.json",new Blob([JSON.stringify(serializeSystem(),null,1)],{type:"application/json"})));
+$("loadBtn").addEventListener("click",()=>$("loadFile").click());
+$("loadFile").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(tx=>{try{applySystem(JSON.parse(tx));$("ioNote").textContent="Loaded "+f.name}catch(err){$("ioNote").textContent="That file is not a FUNC MACHINE WEB system."}})});
+$("shareBtn").addEventListener("click",()=>{const s=btoa(unescape(encodeURIComponent(JSON.stringify(serializeSystem()))));const url=location.href.split("#")[0]+"#s="+s;if(navigator.clipboard)navigator.clipboard.writeText(url);$("ioNote").textContent="Share link copied ("+url.length+" chars) — it carries the whole system and seed. Anyone opening it hears the same piece."});
+$("recBtn").addEventListener("click",e=>{initAudio();if(mediaRec&&mediaRec.state==="recording"){mediaRec.stop();e.target.textContent="⏺ Record audio";e.target.classList.remove("on");return}recChunks=[];mediaRec=new MediaRecorder(recDest.stream);mediaRec.ondataavailable=ev=>recChunks.push(ev.data);mediaRec.onstop=()=>download("func-machine.webm",new Blob(recChunks,{type:mediaRec.mimeType||"audio/webm"}));mediaRec.start();e.target.textContent="⏹ Stop recording & download";e.target.classList.add("on")});
+$("midiExpBtn").addEventListener("click",exportMIDI);
+$("midiBtn").addEventListener("click",async()=>{if(!navigator.requestMIDIAccess){$("ioNote").textContent="Web MIDI is not available in this browser (Chrome/Edge support it).";return}const acc=await navigator.requestMIDIAccess();const sel=$("midiSel");sel.innerHTML='<option value="">No MIDI output</option>';acc.outputs.forEach((o,id)=>{const op=document.createElement("option");op.value=id;op.textContent=o.name||id;sel.appendChild(op)});$("ioNote").textContent="MIDI outputs found: "+acc.outputs.size+" — pick one and notes go out on channels 1–8 as they play.";sel.onchange=()=>{midiOut=sel.value?acc.outputs.get(sel.value):null}});
+
+/* ================= INIT ================= */
+(function init(){
+  $("rootSel").innerHTML=NOTE_NAME.map((n,i)=>'<option value="'+i+'">'+n+'</option>').join("");
+  $("scaleSel").innerHTML=Object.keys(SCALES).map(k=>'<option value="'+k+'">'+SCALE_NAMES[k]+'</option>').join("");
+  $("arcSel").innerHTML=[...Object.keys(ARCS),"CUSTOM"].map(k=>'<option value="'+k+'">'+k+'</option>').join("");
+  const tgtLabels={rhythm:"Rhythm / gates",pitch:"Pitch / melody",density:"Density",length:"Track length (polymeter)",engine:"Engine / variant",sound:"Sound knobs (ADSR, filter…)",harmony:"Harmony / root moves",fx:"FX sends"};
+  $("evoTargets").innerHTML=Object.keys(tgtLabels).map(k=>'<label><input type="checkbox" data-tgt="'+k+'"'+(S.evo.targets[k]?" checked":"")+'> '+tgtLabels[k]+'</label>').join("");
+  $("presetGrid").innerHTML=PRESETS.map((p,i)=>'<button class="preset" data-preset="'+i+'"><span class="pn">'+p.name+'</span><br><span class="pd">'+p.desc+' · '+p.bpm+' BPM · seed '+p.seed.toString(16).toUpperCase()+'</span></button>').join("");
+  $("presetGrid").addEventListener("click",e=>{const b=e.target.closest("[data-preset]");if(b)loadPreset(+b.dataset.preset)});
+  let restored=false;
+  if(location.hash.startsWith("#s=")){try{applySystem(JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3))))));restored=true;$("ioNote").textContent="Opened from a share link — this is the exact shared system."}catch(err){}}
+  if(!restored){try{const saved=localStorage.getItem("funcweb1");if(saved){applySystem(JSON.parse(saved));restored=true;$("ioNote").textContent="Restored your last system from this browser (it autosaves every 10 seconds)."}}catch(err){}}
+  if(!restored){reseed(S.seed);syncAllUI()}
+  formRebuild();
+  setInterval(()=>{try{localStorage.setItem("funcweb1",JSON.stringify(serializeSystem()))}catch(err){}},10000);
+  const sb=document.getElementById("startBtn");if(sb)sb.addEventListener("click",()=>document.getElementById("playBtn").click());
+  const tc=document.getElementById("taskClock");function tickClock(){if(tc)tc.textContent=new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}tickClock();setInterval(tickClock,10000);
+  document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{if(navigator.clipboard)navigator.clipboard.writeText(b.dataset.copy);const o=b.textContent;b.textContent="Copied \u2713";setTimeout(()=>b.textContent=o,1500)}));
+  drawScope();
+})();
+</script>
+</body>
+</html>
